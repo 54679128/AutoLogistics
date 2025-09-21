@@ -89,9 +89,6 @@ local function getMaterials(chest)
         if slot == 1 then
             goto continue
         end
-        if item == nil then
-            goto continue
-        end
         if firstMaterName == nil then
             firstMaterName = item.name
             firstMaterSlot = slot
