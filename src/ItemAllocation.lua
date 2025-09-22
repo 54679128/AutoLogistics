@@ -51,7 +51,7 @@ end
 -- 用于识别的物品名称规律：in、leftOut[序号]、rightOut[序号]
 for _, chest in ipairs(inventorys) do
     local chestName = peripheral.getName(chest)
-    local customName = chest.getItemDetail(1).displayName
+    --local customName = chest.getItemDetail(1).displayName
     --print("customName: " .. customName)
     --print("getIndex: " .. tostring(getIndex(chest)) .. " ,getChestType: " .. getChestType(chest))
     --print(" ")
@@ -99,14 +99,20 @@ local function uniformToLeft(name, buffer)
     --统计该物品总数，顺便查找哪些槽位有需要的物品
     local itemSlots = {}
     local itemTotalCount = 0
-    for i = 2, buffer.size(), 1 do
-        local item = buffer.getItemDetail(i)
-        if item and item.name == name then
-            itemTotalCount = itemTotalCount + item.count
-            table.insert(itemSlots, i)
+    local itemList = buffer.list()
+    for slot, item in pairs(itemList) do
+        if slot == 1 then
+            goto continue
         end
+        if item.name ~= name then
+            goto continue
+        end
+        itemTotalCount = itemTotalCount + item.count
+        table.insert(itemSlots, slot)
+        ::continue::
     end
     --计算每个箱子应得到的物品数量
+
     local portion = itemTotalCount / getLength(chests.left)
     for _, leftChest in pairs(chests.left) do
         local willTransfer = portion
@@ -145,12 +151,17 @@ local function uniformToRight(name, buffer)
     --统计该物品总数，顺便查找哪些槽位有需要的物品
     local itemSlots = {}
     local itemTotalCount = 0
-    for i = 2, buffer.size(), 1 do
-        local item = buffer.getItemDetail(i)
-        if item and item.name == name then
-            itemTotalCount = itemTotalCount + item.count
-            table.insert(itemSlots, i)
+    local itemList = buffer.list()
+    for slot, item in pairs(itemList) do
+        if slot == 1 then
+            goto continue
         end
+        if item.name ~= name then
+            goto continue
+        end
+        itemTotalCount = itemTotalCount + item.count
+        table.insert(itemSlots, slot)
+        ::continue::
     end
     --计算每个箱子应得到的物品数量
     local portion = itemTotalCount / getLength(chests.right)
@@ -191,13 +202,14 @@ local function waitForReady(input)
 end
 
 local function transferToBuffer(source, target)
-    for i = 2, source.size(), 1 do
-        if source.getItemDetail(i) == nil then
+    local sourceItemList = source.list()
+    for slot, item in pairs(sourceItemList) do
+        if slot == 1 then
             goto continue
         end
         while true do
-            local count = source.getItemDetail(i).count
-            local transferCount = source.pushItems(peripheral.getName(target), i)
+            local count = item.count
+            local transferCount = source.pushItems(peripheral.getName(target), slot)
             if count == transferCount then
                 break
             end
