@@ -52,18 +52,9 @@ end
 for _, chest in ipairs(inventorys) do
     local chestName = peripheral.getName(chest)
     local customName = chest.getItemDetail(1).displayName
-    if isLeftChest(chest) then
-        print(chestName .. " is left")
-    elseif isInChest(chest) then
-        print(chestName .. " is input")
-    elseif isRightChest(chest) then
-        print(chestName .. " is right")
-    elseif isBufferChest(chest) then
-        print(chestName .. " is buffer")
-    end
-    print("customName: " .. customName)
-    print("getIndex: " .. tostring(getIndex(chest)) .. " ,getChestType: " .. getChestType(chest))
-    print(" ")
+    --print("customName: " .. customName)
+    --print("getIndex: " .. tostring(getIndex(chest)) .. " ,getChestType: " .. getChestType(chest))
+    --print(" ")
     addToChests(getIndex(chest), getChestType(chest), chest)
     --sleep(0.5)
 end
