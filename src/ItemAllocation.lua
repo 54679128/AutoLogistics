@@ -116,11 +116,7 @@ local function uniformToLeft(name, buffer)
         end
     end
     --计算每个箱子应得到的物品数量
-    --local portion = itemTotalCount / #chests.left
     local portion = itemTotalCount / getLength(chests.left)
-    print("protion: " .. tostring(portion))
-    print("itemTotalCount: " .. tostring(itemTotalCount))
-    print("#chests.left: " .. tostring(#chests.left))
     for _, leftChest in pairs(chests.left) do
         local willTransfer = portion
         local notTransfer = 0
@@ -166,11 +162,7 @@ local function uniformToRight(name, buffer)
         end
     end
     --计算每个箱子应得到的物品数量
-    --local portion = itemTotalCount / #chests.right
     local portion = itemTotalCount / getLength(chests.right)
-    print("protion: " .. tostring(portion))
-    print("itemTotalCount: " .. tostring(itemTotalCount))
-    print("#chests.left: " .. tostring(#chests.left))
     for _, rightChest in pairs(chests.right) do
         local willTransfer = portion
         local notTransfer = 0
@@ -223,23 +215,6 @@ local function transferToBuffer(source, target)
     end
 end
 
-local function showName()
-    print("left total: " .. tostring(#chests.left))
-    for _, left in pairs(chests.left) do
-        print(left.getItemDetail(1).displayName)
-        sleep(0.8)
-    end
-    print("")
-    print("right total: " .. tostring(#chests.right))
-    for _, right in pairs(chests.right) do
-        print(right.getItemDetail(1).displayName)
-        sleep(0.8)
-    end
-end
-
---textutils.slowPrint(textutils.serialise(chests))
---textutils.slowPrint(textutils.serialise(chests.input))
-showName()
 while true do
     local inputChest = table.unpack(chests.input)
     local bufferChest = table.unpack(chests.buffer)
