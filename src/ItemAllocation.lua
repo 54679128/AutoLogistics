@@ -52,18 +52,9 @@ end
 for _, chest in ipairs(inventorys) do
     local chestName = peripheral.getName(chest)
     local customName = chest.getItemDetail(1).displayName
-    if isLeftChest(chest) then
-        print(chestName .. " is left")
-    elseif isInChest(chest) then
-        print(chestName .. " is input")
-    elseif isRightChest(chest) then
-        print(chestName .. " is right")
-    elseif isBufferChest(chest) then
-        print(chestName .. " is buffer")
-    end
-    print("customName: " .. customName)
-    print("getIndex: " .. tostring(getIndex(chest)) .. " ,getChestType: " .. getChestType(chest))
-    print(" ")
+    --print("customName: " .. customName)
+    --print("getIndex: " .. tostring(getIndex(chest)) .. " ,getChestType: " .. getChestType(chest))
+    --print(" ")
     addToChests(getIndex(chest), getChestType(chest), chest)
     --sleep(0.5)
 end
@@ -87,9 +78,6 @@ local function getMaterials(chest)
 
     for slot, item in pairs(list) do
         if slot == 1 then
-            goto continue
-        end
-        if item == nil then
             goto continue
         end
         if firstMaterName == nil then
@@ -119,11 +107,7 @@ local function uniformToLeft(name, buffer)
         end
     end
     --计算每个箱子应得到的物品数量
-    --local portion = itemTotalCount / #chests.left
     local portion = itemTotalCount / getLength(chests.left)
-    print("protion: " .. tostring(portion))
-    print("itemTotalCount: " .. tostring(itemTotalCount))
-    print("#chests.left: " .. tostring(#chests.left))
     for _, leftChest in pairs(chests.left) do
         local willTransfer = portion
         local notTransfer = 0
@@ -169,11 +153,7 @@ local function uniformToRight(name, buffer)
         end
     end
     --计算每个箱子应得到的物品数量
-    --local portion = itemTotalCount / #chests.right
     local portion = itemTotalCount / getLength(chests.right)
-    print("protion: " .. tostring(portion))
-    print("itemTotalCount: " .. tostring(itemTotalCount))
-    print("#chests.left: " .. tostring(#chests.left))
     for _, rightChest in pairs(chests.right) do
         local willTransfer = portion
         local notTransfer = 0
@@ -226,23 +206,6 @@ local function transferToBuffer(source, target)
     end
 end
 
-local function showName()
-    print("left total: " .. tostring(#chests.left))
-    for _, left in pairs(chests.left) do
-        print(left.getItemDetail(1).displayName)
-        sleep(0.8)
-    end
-    print("")
-    print("right total: " .. tostring(#chests.right))
-    for _, right in pairs(chests.right) do
-        print(right.getItemDetail(1).displayName)
-        sleep(0.8)
-    end
-end
-
---textutils.slowPrint(textutils.serialise(chests))
---textutils.slowPrint(textutils.serialise(chests.input))
-showName()
 while true do
     local inputChest = table.unpack(chests.input)
     local bufferChest = table.unpack(chests.buffer)
