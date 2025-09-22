@@ -94,8 +94,6 @@ local function getMaterials(chest)
 end
 
 local function uniformToLeft(name, buffer)
-    --可能有些出口暂时被堵塞了
-    local tryChests = {}
     --统计该物品总数，顺便查找哪些槽位有需要的物品
     local itemSlots = {}
     local itemTotalCount = 0
@@ -112,7 +110,6 @@ local function uniformToLeft(name, buffer)
         ::continue::
     end
     --计算每个箱子应得到的物品数量
-
     local portion = itemTotalCount / getLength(chests.left)
     for _, leftChest in pairs(chests.left) do
         local willTransfer = portion
@@ -127,24 +124,6 @@ local function uniformToLeft(name, buffer)
             table.insert(tryChests, leftChest)
         end
     end
-    --有奇怪的butterfly
-    --[[
-    for _, tryChest in pairs(tryChests) do
-        local willTransfer = portion
-        local notTransfer = 0
-        local fgla = true
-        while fgla do
-            for _, slot in ipairs(itemSlots) do
-                notTransfer = notTransfer +
-                    tryChest.pullItems(peripheral.getName(buffer), slot, willTransfer - notTransfer)
-                if notTransfer == willTransfer then
-                    fgla = false
-                    break
-                end
-            end
-        end
-    end
-    --]]
 end
 
 local function uniformToRight(name, buffer)
