@@ -120,9 +120,6 @@ local function uniformToLeft(name, buffer)
                 break
             end
         end
-        if notTransfer ~= willTransfer then
-            table.insert(tryChests, leftChest)
-        end
     end
 end
 
