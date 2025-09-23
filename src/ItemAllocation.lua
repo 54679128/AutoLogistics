@@ -8,22 +8,12 @@ local function getLength(aTable)
     end
     return i
 end
-local function isLeftChest(chest)
-    return string.find(chest.getItemDetail(1).displayName, "left")
-end
-local function isRightChest(chest)
-    return string.find(chest.getItemDetail(1).displayName, "right")
-end
-local function isInChest(chest)
-    return string.find(chest.getItemDetail(1).displayName, "in")
-end
-local function isBufferChest(chest)
-    return string.find(chest.getItemDetail(1).displayName, "buffer")
-end
+
 local function getIndex(chest)
     local strNumber, _ = string.gsub(chest.getItemDetail(1).displayName, "%D", "")
     return tonumber(strNumber)
 end
+
 local function addToChests(index, chestType, chest)
     if chestType == "input" then
         table.insert(chests.input, index, chest)
@@ -159,12 +149,7 @@ end
 -- 用于识别的物品名称规律：in、leftOut[序号]、rightOut[序号]
 for _, chest in ipairs(inventorys) do
     local chestName = peripheral.getName(chest)
-    --local customName = chest.getItemDetail(1).displayName
-    --print("customName: " .. customName)
-    --print("getIndex: " .. tostring(getIndex(chest)) .. " ,getChestType: " .. getChestType(chest))
-    --print(" ")
     addToChests(getIndex(chest), getChestType(chest), chest)
-    --sleep(0.5)
 end
 
 while true do
