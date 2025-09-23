@@ -97,7 +97,7 @@ end
 ---@param name string
 ---@param buffer ccTweaked.peripherals.Inventory
 ---@param target table{ccTweaked.peripherals.Inventory,...}
-local function uniformToLeft(name, buffer, target)
+local function uniformToTarget(name, buffer, target)
     --统计该物品总数，顺便查找哪些槽位有需要的物品
     local itemSlots = {}
     local itemTotalCount = 0
@@ -120,37 +120,6 @@ local function uniformToLeft(name, buffer, target)
         local notTransfer = 0
         for _, slot in ipairs(itemSlots) do
             notTransfer = notTransfer + leftChest.pullItems(peripheral.getName(buffer), slot, willTransfer - notTransfer)
-            if notTransfer == willTransfer then
-                break
-            end
-        end
-    end
-end
-
-local function uniformToRight(name, buffer)
-    --统计该物品总数，顺便查找哪些槽位有需要的物品
-    local itemSlots = {}
-    local itemTotalCount = 0
-    local itemList = buffer.list()
-    for slot, item in pairs(itemList) do
-        if slot == 1 then
-            goto continue
-        end
-        if item.name ~= name then
-            goto continue
-        end
-        itemTotalCount = itemTotalCount + item.count
-        table.insert(itemSlots, slot)
-        ::continue::
-    end
-    --计算每个箱子应得到的物品数量
-    local portion = itemTotalCount / getLength(chests.right)
-    for _, rightChest in pairs(chests.right) do
-        local willTransfer = portion
-        local notTransfer = 0
-        for _, slot in ipairs(itemSlots) do
-            notTransfer = notTransfer +
-                rightChest.pullItems(peripheral.getName(buffer), slot, willTransfer - notTransfer)
             if notTransfer == willTransfer then
                 break
             end
@@ -207,8 +176,8 @@ while true do
         local firstMaterialName, secondMaterialName = getMaterials(bufferChest)
         print(firstMaterialName)
         print(secondMaterialName)
-        uniformToLeft(firstMaterialName, bufferChest, chests.left)
-        uniformToRight(secondMaterialName, bufferChest)
+        uniformToTarget(firstMaterialName, bufferChest, chests.left)
+        uniformToTarget(secondMaterialName, bufferChest, chests.right)
     end
     sleep(2)
 end
