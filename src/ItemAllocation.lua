@@ -48,17 +48,6 @@ local function getChestType(chest)
     return nil
 end
 
--- 用于识别的物品名称规律：in、leftOut[序号]、rightOut[序号]
-for _, chest in ipairs(inventorys) do
-    local chestName = peripheral.getName(chest)
-    --local customName = chest.getItemDetail(1).displayName
-    --print("customName: " .. customName)
-    --print("getIndex: " .. tostring(getIndex(chest)) .. " ,getChestType: " .. getChestType(chest))
-    --print(" ")
-    addToChests(getIndex(chest), getChestType(chest), chest)
-    --sleep(0.5)
-end
-
 local function isEmpty(chest)
     local list = chest.list()
     for slot, item in ipairs(list) do
@@ -165,6 +154,17 @@ local function transferToBuffer(source, target)
         end
         ::continue::
     end
+end
+
+-- 用于识别的物品名称规律：in、leftOut[序号]、rightOut[序号]
+for _, chest in ipairs(inventorys) do
+    local chestName = peripheral.getName(chest)
+    --local customName = chest.getItemDetail(1).displayName
+    --print("customName: " .. customName)
+    --print("getIndex: " .. tostring(getIndex(chest)) .. " ,getChestType: " .. getChestType(chest))
+    --print(" ")
+    addToChests(getIndex(chest), getChestType(chest), chest)
+    --sleep(0.5)
 end
 
 while true do
