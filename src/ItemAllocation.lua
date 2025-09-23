@@ -93,7 +93,11 @@ local function getMaterials(chest)
     return firstMaterName, secondMaterName
 end
 
-local function uniformToLeft(name, buffer)
+---从缓存向一系列目标容器均匀转移物品
+---@param name string
+---@param buffer ccTweaked.peripherals.Inventory
+---@param target table{ccTweaked.peripherals.Inventory,...}
+local function uniformToLeft(name, buffer, target)
     --统计该物品总数，顺便查找哪些槽位有需要的物品
     local itemSlots = {}
     local itemTotalCount = 0
@@ -110,8 +114,8 @@ local function uniformToLeft(name, buffer)
         ::continue::
     end
     --计算每个箱子应得到的物品数量
-    local portion = itemTotalCount / getLength(chests.left)
-    for _, leftChest in pairs(chests.left) do
+    local portion = itemTotalCount / getLength(target)
+    for _, leftChest in pairs(target) do
         local willTransfer = portion
         local notTransfer = 0
         for _, slot in ipairs(itemSlots) do
@@ -203,7 +207,7 @@ while true do
         local firstMaterialName, secondMaterialName = getMaterials(bufferChest)
         print(firstMaterialName)
         print(secondMaterialName)
-        uniformToLeft(firstMaterialName, bufferChest)
+        uniformToLeft(firstMaterialName, bufferChest, chests.left)
         uniformToRight(secondMaterialName, bufferChest)
     end
     sleep(2)
