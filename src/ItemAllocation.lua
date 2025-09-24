@@ -148,13 +148,17 @@ end
 
 local aChests = {}
 -- 用名字分类
-for _, inventory in pairs(inventorys) do
+for k, inventory in pairs(inventorys) do
+    if k == "n" then
+        goto continue
+    end
     local peripheralType = peripheral.getName(inventory)
     local name = string.match(peripheralType, "^(.+)_%d+$")
     if not aChests[name] then
         aChests[name] = {}
     end
     table.insert(aChests[name], inventory)
+    ::continue::
 end
 -- 用物品分类
 for _, inventory in pairs(inventorys) do
