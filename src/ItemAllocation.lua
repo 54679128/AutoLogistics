@@ -146,43 +146,144 @@ local function transferToBuffer(source, target)
     end
 end
 
-local aChests = {}
--- 用名字分类
-for k, inventory in pairs(inventorys) do
-    if k == "n" then
-        goto continue
-    end
-    local peripheralType = peripheral.getName(inventory)
-    local name = string.match(peripheralType, "^(.+)_%d+$")
-    if not aChests[name] then
-        aChests[name] = {}
-    end
-    table.insert(aChests[name], inventory)
-    ::continue::
-end
--- 用物品分类
-for k, inventory in pairs(inventorys) do
-    if k == "n" then
-        goto continue
-    end
-    local itemList = inventory.list()
-    for _, item in pairs(itemList) do
-        local name = item.name
+local function classifyByFeatures()
+    local aChests = {}
+    -- 用名字分类
+    for k, inventory in pairs(inventorys) do
+        if k == "n" then
+            goto continue
+        end
+        local peripheralType = peripheral.getName(inventory)
+        local name = string.match(peripheralType, "^(.+)_%d+$")
         if not aChests[name] then
             aChests[name] = {}
         end
-        table.insert(aChests[name], inventory)
+        table.insert(aChests[name], peripheral.getName(inventory))
+        ::continue::
     end
-    ::continue::
-end
--- 展示分类结果
-for characterized, talee in pairs(aChests) do
-    textutils.slowPrint("These containers:")
-    for _, inventory in pairs(talee) do
-        textutils.slowPrint(peripheral.getName(inventory))
+    -- 用物品分类
+    for k, inventory in pairs(inventorys) do
+        if k == "n" then
+            goto continue
+        end
+        local itemList = inventory.list()
+        for _, item in pairs(itemList) do
+            local name = item.name
+            if not aChests[name] then
+                aChests[name] = {}
+            end
+            table.insert(aChests[name], peripheral.getName(inventory))
+        end
+        ::continue::
     end
-    textutils.slowPrint("Characterized by: " .. characterized)
+    return aChests
 end
+
+---按特征展示分类结果
+---@param featureTable table 使用classifyByFeatures函数得到
+---@see classifyByFeatures
+local function displayClassificationByFeatures(featureTable)
+    parallel.waitForAny(function()
+        for characterized, talee in pairs(featureTable) do
+            textutils.slowPrint("These containers:")
+            for _, inventory in pairs(talee) do
+                textutils.slowPrint(inventory)
+            end
+            textutils.slowPrint("Characterized by: " .. characterized)
+        end
+    end, function()
+        os.pullEvent("key_up")
+        term.clear()
+        term.setCursorPos(0, 2)
+    end)
+end
+
+---comment
+---@param featureTable table {input = ...,buffer = ...,output = {1 = {...},2={...},...}}
+local function configureInputAndOutput(featureTable)
+    local file = io.open("ItemAllocationConfigured.txt", "r")
+    if file then
+        file:seek("set")
+        local out = textutils.unserialise(file:read("a"))
+        return out
+    end
+    local outputIndex = 0
+    local out = {}
+    local feature = {}
+    for characteristic, _ in pairs(featureTable) do
+        table.insert(feature, characteristic)
+    end
+    local operations = {
+        input = function()
+            print("Choose input feature: ")
+            local choice = read(nil, feature)
+            out["input"] = featureTable[choice]
+            return choice
+        end,
+        buffer = function()
+            print("Choose buffer feature: ")
+            local choice = read(nil, feature)
+            out["buffer"] = featureTable[choice]
+            return choice
+        end,
+        output = function()
+            print("Choose output feature: ")
+            local choice = read(nil, feature)
+            if not out["output"] then
+                out["output"] = {}
+            end
+            print("Need custom name?(y/n)")
+            local ans = read(nil, { "y", "n" })
+            if string.lower(ans) == "y" then
+                local customName = read(nil);
+                (out["output"])[customName] = featureTable[choice];
+            else
+                table.insert(out["output"], featureTable[choice])
+            end
+            return choice
+        end
+    }
+    while true do
+        print("Set input/output/buffer: ")
+        local operationsType = read(nil, { "input", "buffer", "output", "exit" })
+        if operationsType == "exit" then
+            if out["input"] == nil then
+                printError("Must have input")
+                goto continue
+            elseif out["buffer"] == nil then
+                printError("Must have buffer")
+                goto continue
+            elseif out["output"] == nil then
+                printError("Must have output")
+                goto continue
+            end
+            break
+        end
+        if not operations[operationsType] then
+            printError("error")
+            goto continue
+        end
+        operations[operationsType]()
+        ::continue::
+    end
+    return out
+end
+
+local function saveConfiguredFile(configuredTable)
+    local file = io.open("ItemAllocationConfigured.txt", "w+")
+    if not file then
+        error("can't save configure")
+    end
+    file:write(textutils.serialise(configuredTable, { allow_repetitions = true }))
+    file:close()
+end
+
+--配置输入输出
+local featureTable = classifyByFeatures()
+displayClassificationByFeatures(featureTable)
+local configuredTable = configureInputAndOutput(featureTable)
+textutils.slowPrint(textutils.serialise(configuredTable, { allow_repetitions = true }))
+saveConfiguredFile(configuredTable)
 
 -- 用于识别的物品名称规律：in、leftOut[序号]、rightOut[序号]
 for _, chest in ipairs(inventorys) do
