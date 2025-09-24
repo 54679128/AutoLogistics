@@ -161,7 +161,10 @@ for k, inventory in pairs(inventorys) do
     ::continue::
 end
 -- 用物品分类
-for _, inventory in pairs(inventorys) do
+for k, inventory in pairs(inventorys) do
+    if k == "n" then
+        goto continue
+    end
     local itemList = inventory.list()
     for _, item in pairs(itemList) do
         local name = item.name
@@ -170,6 +173,7 @@ for _, inventory in pairs(inventorys) do
         end
         table.insert(aChests[name], inventory)
     end
+    ::continue::
 end
 -- 展示分类结果
 for characterized, talee in pairs(aChests) do
