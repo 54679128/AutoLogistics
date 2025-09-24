@@ -177,11 +177,11 @@ for k, inventory in pairs(inventorys) do
 end
 -- 展示分类结果
 for characterized, talee in pairs(aChests) do
-    print("These containers:")
+    textutils.slowPrint("These containers:")
     for _, inventory in pairs(talee) do
-        print(peripheral.getName(inventory))
+        textutils.slowPrint(peripheral.getName(inventory))
     end
-    print("Characterized by: " .. characterized)
+    textutils.slowPrint("Characterized by: " .. characterized)
 end
 
 -- 用于识别的物品名称规律：in、leftOut[序号]、rightOut[序号]
