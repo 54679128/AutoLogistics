@@ -146,6 +146,9 @@ local function transferToBuffer(source, target)
     end
 end
 
+local aChests
+
+
 -- 用于识别的物品名称规律：in、leftOut[序号]、rightOut[序号]
 for _, chest in ipairs(inventorys) do
     local chestName = peripheral.getName(chest)
