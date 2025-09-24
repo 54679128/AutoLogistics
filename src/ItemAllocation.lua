@@ -146,8 +146,35 @@ local function transferToBuffer(source, target)
     end
 end
 
-local aChests
-
+local aChests = {}
+-- 用名字分类
+for _, inventory in pairs(inventorys) do
+    local peripheralType = peripheral.getName(inventory)
+    local name = string.match(peripheralType, "^(.+)_%d+$")
+    if not aChests[name] then
+        aChests[name] = {}
+    end
+    table.insert(aChests[name], inventory)
+end
+-- 用物品分类
+for _, inventory in pairs(inventorys) do
+    local itemList = inventory.list()
+    for _, item in pairs(itemList) do
+        local name = item.name
+        if not aChests[name] then
+            aChests[name] = {}
+        end
+        table.insert(aChests[name], inventory)
+    end
+end
+-- 展示分类结果
+for characterized, talee in pairs(aChests) do
+    print("These containers:")
+    for _, inventory in pairs(talee) do
+        print(peripheral.getName(inventory))
+    end
+    print("Characterized by: " .. characterized)
+end
 
 -- 用于识别的物品名称规律：in、leftOut[序号]、rightOut[序号]
 for _, chest in ipairs(inventorys) do
