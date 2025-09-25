@@ -1,5 +1,7 @@
 ---@module "buffer"
 
+---@class a54679128.Buffer
+---@field inventory ccTweaked.peripherals.Inventory
 local buffer = {}
 buffer.__index = buffer
 
