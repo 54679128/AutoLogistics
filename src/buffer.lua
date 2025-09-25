@@ -90,7 +90,7 @@ end
 ---就像正常的通用外设
 ---@return table<number, ccTweaked.peripherals.inventory.item>
 function buffer:list()
-    return buffer.inventory.list()
+    return self.inventory.list()
 end
 
 ---缓存大小
