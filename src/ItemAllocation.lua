@@ -1,5 +1,6 @@
 local inventorys = table.pack(peripheral.find("inventory"))
 local chests = { input = {}, left = {}, right = {}, buffer = {} }
+local Buffer = require("buffer")
 
 local function getLength(aTable)
     local i = 0
@@ -39,12 +40,15 @@ local function getChestType(chest)
 end
 
 local function isEmpty(chest)
+    print(peripheral.getName(chest))
     local list = chest.list()
-    for slot, item in ipairs(list) do
-        if slot ~= 1 and item then
+    for _, item in pairs(list) do
+        if item then
+            print("false")
             return false
         end
     end
+    print("ture")
     return true
 end
 
@@ -56,9 +60,6 @@ local function getMaterials(chest)
     local secondMaterSlot
 
     for slot, item in pairs(list) do
-        if slot == 1 then
-            goto continue
-        end
         if firstMaterName == nil then
             firstMaterName = item.name
             firstMaterSlot = slot
@@ -67,24 +68,21 @@ local function getMaterials(chest)
             secondMaterSlot = slot
             break
         end
-        ::continue::
     end
     return firstMaterName, secondMaterName
 end
 
 ---从缓存向一系列目标容器均匀转移物品
 ---@param name string
----@param buffer ccTweaked.peripherals.Inventory
+---@param buffer a54679128.Buffer
 ---@param target table{ccTweaked.peripherals.Inventory,...}
 local function uniformToTarget(name, buffer, target)
+    --[[
     --统计该物品总数，顺便查找哪些槽位有需要的物品
     local itemSlots = {}
     local itemTotalCount = 0
     local itemList = buffer.list()
     for slot, item in pairs(itemList) do
-        if slot == 1 then
-            goto continue
-        end
         if item.name ~= name then
             goto continue
         end
@@ -103,6 +101,21 @@ local function uniformToTarget(name, buffer, target)
                 break
             end
         end
+    end
+    --]]
+    local itemTotalCount = 0
+    local itemList = buffer:list()
+    for slot, item in pairs(itemList) do
+        if item.name ~= name then
+            goto continue
+        end
+        itemTotalCount = itemTotalCount + item.count
+        ::continue::
+    end
+    --计算每个容器应得到的原料数量
+    local portion = itemTotalCount / getLength(target)
+    for _, p in pairs(target) do
+        buffer:output(peripheral.getName(p), name, portion)
     end
 end
 
@@ -285,10 +298,12 @@ local function configurationFileExist()
 end
 
 --配置输入输出
+---@alias ConTable { input: string, buffer: string, output: table }
 local configuredTable
 if not configurationFileExist() then
     local featureTable = classifyByFeatures()
     displayClassificationByFeatures(featureTable)
+    ---@cast configuredTable ConTable
     configuredTable = configureInputAndOutput(featureTable)
     saveConfiguredFile(configuredTable)
     print("Configuration completed, you can remove the items previously used for configuration from the container")
@@ -297,28 +312,35 @@ else
     local file = io.open("ItemAllocationConfigured.txt", "r")
     if file then
         file:seek("set")
+        ---@cast configuredTable ConTable
         configuredTable = textutils.unserialise(file:read("a"))
     end
 end
 
-
--- 用于识别的物品名称规律：in、leftOut[序号]、rightOut[序号]
-for _, chest in ipairs(inventorys) do
-    local chestName = peripheral.getName(chest)
-    addToChests(getIndex(chest), getChestType(chest), chest)
-end
-
 while true do
-    local inputChest = table.unpack(chests.input)
-    local bufferChest = table.unpack(chests.buffer)
-    if not isEmpty(inputChest) then
-        waitForReady(inputChest)
-        transferToBuffer(inputChest, bufferChest)
-        local firstMaterialName, secondMaterialName = getMaterials(bufferChest)
+    if not configuredTable then
+        error("unknown error")
+    end
+    ---@cast configuredTable ConTable
+    local inputContainer = peripheral.wrap(configuredTable.input[1])
+    ---@diagnostic disable-next-line: param-type-mismatch
+    local bufferContainer = Buffer:asBuffer(peripheral.wrap(configuredTable.buffer[1]))
+    if not isEmpty(inputContainer) then
+        waitForReady(inputContainer)
+        bufferContainer:input(configuredTable.input[1])
+        local firstMaterialName, secondMaterialName = getMaterials(bufferContainer.inventory)
         print(firstMaterialName)
         print(secondMaterialName)
-        uniformToTarget(firstMaterialName, bufferChest, chests.left)
-        uniformToTarget(secondMaterialName, bufferChest, chests.right)
+        local tempFirst = {}
+        local tempSecond = {}
+        for _, name in pairs(configuredTable.output[1]) do
+            table.insert(tempFirst, peripheral.wrap(name))
+        end
+        for _, name in pairs(configuredTable.output[2]) do
+            table.insert(tempSecond, peripheral.wrap(name))
+        end
+        uniformToTarget(firstMaterialName, bufferContainer, tempFirst)
+        uniformToTarget(secondMaterialName, bufferContainer, tempSecond)
     end
     sleep(2)
 end
