@@ -40,7 +40,7 @@ function buffer:input(fromName, slot)
         local willTransfer = 0
         local times = 0
         while true do
-            willTransfer = willTransfer + self.inventory.pullItems("fromName", iSlot)
+            willTransfer = willTransfer + self.inventory.pullItems(fromName, iSlot)
             if willTransfer == count or times > maxTries then
                 break
             end
