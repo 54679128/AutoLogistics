@@ -194,19 +194,13 @@ local function displayClassificationByFeatures(featureTable)
     end, function()
         os.pullEvent("key_up")
         term.clear()
-        term.setCursorPos(0, 2)
+        term.setCursorPos(1, 2)
     end)
 end
 
 ---comment
 ---@param featureTable table {input = ...,buffer = ...,output = {1 = {...},2={...},...}}
 local function configureInputAndOutput(featureTable)
-    local file = io.open("ItemAllocationConfigured.txt", "r")
-    if file then
-        file:seek("set")
-        local out = textutils.unserialise(file:read("a"))
-        return out
-    end
     local outputIndex = 0
     local out = {}
     local feature = {}
@@ -278,12 +272,26 @@ local function saveConfiguredFile(configuredTable)
     file:close()
 end
 
+local function configurationFileExist()
+
+end
+
 --配置输入输出
-local featureTable = classifyByFeatures()
-displayClassificationByFeatures(featureTable)
-local configuredTable = configureInputAndOutput(featureTable)
-textutils.slowPrint(textutils.serialise(configuredTable, { allow_repetitions = true }))
-saveConfiguredFile(configuredTable)
+local configuredTable
+if not configurationFileExist() then
+    local featureTable = classifyByFeatures()
+    displayClassificationByFeatures(featureTable)
+    configuredTable = configureInputAndOutput(featureTable)
+    saveConfiguredFile(configuredTable)
+else
+    -- 如果已经存在配置文件，调用
+    local file = io.open("ItemAllocationConfigured.txt", "r")
+    if file then
+        file:seek("set")
+        configuredTable = textutils.unserialise(file:read("a"))
+    end
+end
+
 
 -- 用于识别的物品名称规律：in、leftOut[序号]、rightOut[序号]
 for _, chest in ipairs(inventorys) do
