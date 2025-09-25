@@ -273,7 +273,11 @@ local function saveConfiguredFile(configuredTable)
 end
 
 local function configurationFileExist()
-
+    local file = io.open("ItemAllocationConfigured.txt", "r")
+    if file then
+        return true
+    end
+    return false
 end
 
 --配置输入输出
