@@ -90,3 +90,5 @@ end
 function buffer:size()
     return buffer.inventory.size()
 end
+
+return buffer
