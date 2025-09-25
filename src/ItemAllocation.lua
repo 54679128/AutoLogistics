@@ -167,12 +167,16 @@ local function classifyByFeatures()
             goto continue
         end
         local itemList = inventory.list()
+        local blackList = {}
         for _, item in pairs(itemList) do
             local name = item.name
             if not aChests[name] then
                 aChests[name] = {}
             end
-            table.insert(aChests[name], peripheral.getName(inventory))
+            if not blackList[name] then
+                table.insert(aChests[name], peripheral.getName(inventory))
+                blackList[name] = true
+            end
         end
         ::continue::
     end
