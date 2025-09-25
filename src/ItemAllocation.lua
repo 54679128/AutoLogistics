@@ -10,35 +10,6 @@ local function getLength(aTable)
     return i
 end
 
-local function getIndex(chest)
-    local strNumber, _ = string.gsub(chest.getItemDetail(1).displayName, "%D", "")
-    return tonumber(strNumber)
-end
-
-local function addToChests(index, chestType, chest)
-    if chestType == "input" then
-        table.insert(chests.input, index, chest)
-    elseif chestType == "left" then
-        table.insert(chests.left, index, chest)
-    elseif chestType == "right" then
-        table.insert(chests.right, index, chest)
-    elseif chestType == "buffer" then
-        table.insert(chests.buffer, index, chest)
-    end
-end
-
-local function getChestType(chest)
-    local item = chest.getItemDetail(1)
-    --if not item then return nil end
-
-    local name = item.displayName:lower()
-    if name:find("in") then return "input" end
-    if name:find("left") then return "left" end
-    if name:find("right") then return "right" end
-    if name:find("buffer") then return "buffer" end
-    return nil
-end
-
 local function isEmpty(chest)
     print(peripheral.getName(chest))
     local list = chest.list()
@@ -77,32 +48,6 @@ end
 ---@param buffer a54679128.Buffer
 ---@param target table{ccTweaked.peripherals.Inventory,...}
 local function uniformToTarget(name, buffer, target)
-    --[[
-    --统计该物品总数，顺便查找哪些槽位有需要的物品
-    local itemSlots = {}
-    local itemTotalCount = 0
-    local itemList = buffer.list()
-    for slot, item in pairs(itemList) do
-        if item.name ~= name then
-            goto continue
-        end
-        itemTotalCount = itemTotalCount + item.count
-        table.insert(itemSlots, slot)
-        ::continue::
-    end
-    --计算每个箱子应得到的物品数量
-    local portion = itemTotalCount / getLength(target)
-    for _, leftChest in pairs(target) do
-        local willTransfer = portion
-        local notTransfer = 0
-        for _, slot in ipairs(itemSlots) do
-            notTransfer = notTransfer + leftChest.pullItems(peripheral.getName(buffer), slot, willTransfer - notTransfer)
-            if notTransfer == willTransfer then
-                break
-            end
-        end
-    end
-    --]]
     local itemTotalCount = 0
     local itemList = buffer:list()
     for slot, item in pairs(itemList) do
@@ -140,23 +85,6 @@ local function waitForReady(input)
         print("isn't ready")
     end
     print("ready")
-end
-
-local function transferToBuffer(source, target)
-    local sourceItemList = source.list()
-    for slot, item in pairs(sourceItemList) do
-        if slot == 1 then
-            goto continue
-        end
-        while true do
-            local count = item.count
-            local transferCount = source.pushItems(peripheral.getName(target), slot)
-            if count == transferCount then
-                break
-            end
-        end
-        ::continue::
-    end
 end
 
 local function classifyByFeatures()
