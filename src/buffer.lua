@@ -58,7 +58,7 @@ end
 ---@return string|nil
 function buffer:output(toName, itemName, count)
     --确定是否有足够的物品
-    local itemList = buffer.inventory.list()
+    local itemList = self.inventory.list()
     local k = 0 --储存当前容器物品数，暂时不知道怎么命名
     for slot, item in pairs(itemList) do
         if item.name == itemName then
