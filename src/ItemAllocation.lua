@@ -291,6 +291,7 @@ if not configurationFileExist() then
     displayClassificationByFeatures(featureTable)
     configuredTable = configureInputAndOutput(featureTable)
     saveConfiguredFile(configuredTable)
+    print("Configuration completed, you can remove the items previously used for configuration from the container")
 else
     -- 如果已经存在配置文件，调用
     local file = io.open("ItemAllocationConfigured.txt", "r")
