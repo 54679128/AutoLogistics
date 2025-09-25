@@ -7,7 +7,7 @@ buffer.__index = buffer
 
 ---将该容器作为一个缓存
 ---@param inventory ccTweaked.peripherals.Inventory
----@return table
+---@return a54679128.Buffer
 function buffer:asBuffer(inventory)
     local o = {}
     o.inventory = inventory
