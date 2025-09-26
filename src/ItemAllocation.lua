@@ -10,17 +10,46 @@ local function getLength(aTable)
     return i
 end
 
-local function isEmpty(chest)
-    print(peripheral.getName(chest))
-    local list = chest.list()
-    for _, item in pairs(list) do
-        if item then
-            print("false")
-            return false
+---接收一个或一组外设名，判断这些外设（只能是通用流体外设或通用物品外设）是否都为空
+---@param peripheralNames string|table<number,string>
+---@return boolean
+local function isEmpty(peripheralNames)
+    if type(peripheralNames) == "table" then
+        for _, peripheralName in pairs(peripheralNames) do
+            local unknowStorge = peripheral.wrap(peripheralName)
+            if not unknowStorge then
+                error(peripheralName .. "doesn't exsits")
+            end
+            if unknowStorge.tanks then
+                local fluidTanks = unknowStorge.tanks()
+                for _, fluidInfo in pairs(fluidTanks) do
+                    if fluidInfo then
+                        return false
+                    end
+                end
+            end
+            if unknowStorge.list then
+                local itemList = unknowStorge.list()
+                for _, itemInfo in pairs(itemList) do
+                    if itemInfo then
+                        return false
+                    end
+                end
+            end
         end
+        return true
     end
-    print("ture")
-    return true
+    if type(peripheralNames) == "string" then
+        local itemList = peripheral.wrap(peripheralNames).list()
+        for _, itemInfo in pairs(itemList) do
+            if itemInfo then
+                return false
+            end
+        end
+        print("ture")
+        return true
+    end
+    error("perppheralName is't a string or table", 2)
 end
 
 local function getMaterials(chest)
@@ -253,7 +282,7 @@ while true do
     local inputContainer = peripheral.wrap(configuredTable.input[1])
     ---@diagnostic disable-next-line: param-type-mismatch
     local bufferContainer = Buffer:asBuffer(peripheral.wrap(configuredTable.buffer[1]))
-    if not isEmpty(inputContainer) then
+    if not isEmpty(configuredTable.input) then
         waitForReady(inputContainer)
         bufferContainer:input(configuredTable.input[1])
         local firstMaterialName, secondMaterialName = getMaterials(bufferContainer.inventory)
