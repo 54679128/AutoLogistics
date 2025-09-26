@@ -93,22 +93,63 @@ local function uniformToTarget(name, buffer, target)
     end
 end
 
-local function waitForReady(input)
+---获取一组通用库存外设的物品总数。你不必保证所有外设都是通用库存外设
+---@param peripheralNames table<number,string>
+---@return number
+local function getItemCount(peripheralNames)
+    local result = 0
+    for _, peripheralName in pairs(peripheralNames) do
+        local comStorge = peripheral.wrap(peripheralName)
+        if not comStorge then
+            error(peripheralName .. " does't exist", 3)
+        end
+        if comStorge.list then
+            local itemList = comStorge.list()
+            for _, itemInfo in pairs(itemList) do
+                result = result + itemInfo.count
+            end
+        end
+    end
+    return result
+end
+
+---获取一组通用流体库存外设的物品总数。你不必保证所有外设都是通用流体库存外设
+---@param peripheralNames table<number,string>
+---@return number
+local function getFulidCount(peripheralNames)
+    local result = 0
+    for _, peripheralName in pairs(peripheralNames) do
+        local comStorge = peripheral.wrap(peripheralName)
+        if not comStorge then
+            error(peripheralName .. " does't exist", 3)
+        end
+        if comStorge.tanks then
+            local fluidTanks = comStorge.tanks()
+            for _, fluidInfo in pairs(fluidTanks) do
+                result = result + fluidInfo.amount
+            end
+        end
+    end
+    return result
+end
+
+---用于判断指定的一个或一组输入是否准备好传输物品
+---@param peripheralNames string|table<number,string>
+local function waitForReady(peripheralNames)
+    if type(peripheralNames) == "string" then
+        peripheralNames = { peripheralNames }
+    end
     while true do
-        local lastCount = 0
-        local newCount = 0
-        for _, item in pairs(input.list()) do
-            if item then
-                lastCount = lastCount + item.count
-            end
-        end
+        local itemLastCount = 0
+        local itemNewCount = 0
+        local fluidLastCount = 0
+        local fluidNewCount = 0
+        itemLastCount = getItemCount(peripheralNames)
+        fluidLastCount = getFulidCount(peripheralNames)
         sleep(2)
-        for _, item in pairs(input.list()) do
-            if item then
-                newCount = newCount + item.count
-            end
-        end
-        if newCount == lastCount then
+        itemNewCount = getItemCount(peripheralNames)
+        fluidNewCount = getFulidCount(peripheralNames)
+        if itemLastCount == itemNewCount and fluidLastCount == fluidNewCount then
             break
         end
         print("isn't ready")
@@ -283,7 +324,7 @@ while true do
     ---@diagnostic disable-next-line: param-type-mismatch
     local bufferContainer = Buffer:asBuffer(peripheral.wrap(configuredTable.buffer[1]))
     if not isEmpty(configuredTable.input) then
-        waitForReady(inputContainer)
+        waitForReady(configuredTable.input)
         bufferContainer:input(configuredTable.input[1])
         local firstMaterialName, secondMaterialName = getMaterials(bufferContainer.inventory)
         print(firstMaterialName)
