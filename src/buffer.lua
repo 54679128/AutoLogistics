@@ -1,50 +1,119 @@
----@module "buffer"
+---@module "Buffer"
 
 ---@class a54679128.Buffer
----@field inventory ccTweaked.peripherals.Inventory
+---@field storge table<any,string> 储存一系列通用存储外设名
 local buffer = {}
 buffer.__index = buffer
 
----将该容器作为一个缓存
----@param inventory ccTweaked.peripherals.Inventory
+---一个或一组容器作为缓存
+---@param peripheralNames ccTweaked.peripherals.Inventory
 ---@return a54679128.Buffer
-function buffer:asBuffer(inventory)
+function buffer:asBuffer(peripheralNames)
+    if type(peripheralNames) == "string" then
+        peripheralNames = { peripheralNames }
+    end
+    print(textutils.serialise(peripheralNames))
     local o = {}
-    o.inventory = inventory
+    o.storge = {}
+    for _, peripheralName in pairs(peripheralNames) do
+        local comStorge = peripheral.wrap(peripheralName)
+        if not comStorge then
+            error(peripheralName .. " is't a peripheral or doesn't exist", 2)
+        end
+        table.insert(o.storge, peripheralName)
+    end
     return setmetatable(o, buffer)
 end
 
----向缓存中输入物品
----@param fromName string 储存待输入物品的容器名
----@param slot number? 待输入物品所在槽位
+---从一个或一组容器中向缓存中输入素材
+---暂时想不到如何检测是否有足够的空间储存输入素材
+---@param fromNames string|table<any,string> 储存待输入素材的容器名
 ---@return boolean
 ---@return string|nil
-function buffer:input(fromName, slot)
-    --梦游时写的
-    if not fromName or type(fromName) ~= "string" or not peripheral.wrap(fromName) then end
-
-    local maxTries = 100
-    local input = peripheral.wrap(fromName)
-    if input == nil then
-        return false, "The peripheral doesn't exist"
+function buffer:input(fromNames)
+    if type(fromNames) == "string" then
+        fromNames = { fromNames }
     end
-    local content = input.list()
-    --[[
-    local needTransfer = {}
-    for slot, item in pairs(content) do
-        needTransfer[slot] = item.count
+    -- fromNames是空的
+    if not next(fromNames) then
+        error("fromNames is a space", 2)
     end
-    --]]
-    for iSlot, item in pairs(content) do
-        local count = item.count
-        local willTransfer = 0
-        local times = 0
-        while true do
-            willTransfer = willTransfer + self.inventory.pullItems(fromName, iSlot)
-            if willTransfer == count or times > maxTries then
+    for _, sourceName in pairs(fromNames) do
+        -- 因为getItemDetail很耗时间，所以我尽可能的不用它，这限制了很多事
+        -- 提取该输入的所有原料到缓存中
+        for _, storgeName in pairs(self.storge) do
+            local maxTry = 100
+            local comStorge = peripheral.wrap(storgeName)
+            ---@cast sourceName string
+            local sourceStorge = peripheral.wrap(sourceName)
+            if not comStorge or not sourceStorge then
+                error("something go wrong", 2)
+            end
+            if comStorge.list and sourceStorge.list then
+                local itemList = sourceStorge.list()
+                for slot, itemInfo in pairs(itemList) do
+                    local tryTimes = 0
+                    while true do
+                        local moveItemCount = sourceStorge.pushItems(storgeName, slot)
+                        tryTimes = tryTimes + 1
+                        if moveItemCount == 0 then
+                            break
+                        end
+                        if tryTimes > maxTry then
+                            break
+                        end
+                    end
+                end
+            end
+            if comStorge.tanks and sourceStorge.tanks then
+                local fluidTanks = sourceStorge.tanks()
+                for IDontKnowWhatWasThat, fluidInfo in pairs(fluidTanks) do
+                    local tryTimes = 0
+                    while true do
+                        local moveFluidAmount = sourceStorge.pushFluid(storgeName, fluidInfo.amount, fluidInfo.name)
+                        tryTimes = tryTimes + 1
+                        if moveFluidAmount == 0 then
+                            break
+                        end
+                        if tryTimes > maxTry then
+                            break
+                        end
+                    end
+                end
+            end
+            -- 如果该输入已空，则直接跳出循环
+            local itemState = false
+            local fluidState = false
+            if sourceStorge.list and (not next(sourceStorge.list())) then
+                itemState = true
+            elseif not sourceStorge.list then
+                itemState = true
+            end
+            if sourceStorge.tanks and (not next(sourceStorge.tanks())) then
+                fluidState = true
+            elseif not sourceStorge.tanks then
+                fluidState = true
+            end
+            if itemState and fluidState then
                 break
             end
-            times = times + 1
+        end
+    end
+    for _, sourceName in pairs(fromNames) do
+        local comStorge = peripheral.wrap(sourceName)
+        if not comStorge then
+            error("something go wrong", 2)
+        end
+        -- 经过所有处理后有一个输入不为空
+        if comStorge.list and next(comStorge.list()) then
+            -- 由于检查了所有缓存，如果输入还有别的东西，那么可以直接报错了
+            -- 也许以后我会写个撤回操作，但现在我只想写个简单的报错
+            error("Insufficient cache", 2)
+        end
+        if comStorge.tanks and next(comStorge.tanks()) then
+            -- 由于检查了所有缓存，如果输入还有别的东西，那么可以直接报错了
+            -- 也许以后我会写个撤回操作，但现在我只想写个简单的报错
+            error("Insufficient cache", 2)
         end
     end
     return true, nil
