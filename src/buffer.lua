@@ -150,13 +150,17 @@ function buffer:output(toName, name, count)
     end
     local k = 0
     for sourceName, num in pairs(self.storgeList[name]) do
+        if type(num) == "string" then
+            goto continue
+        end
         table.insert(sourcePerName, sourceName)
         k = k + num
         if k >= count then
             break
         end
+        ::continue::
     end
-    if k <= count then
+    if k < count then
         return false, "There is not enough of this material in the buffer"
     end
     --输出
