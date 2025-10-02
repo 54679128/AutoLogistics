@@ -1,7 +1,8 @@
 ---@module "Buffer"
 
 ---@class a54679128.Buffer
----@field storge table<any,string> 储存一系列通用存储外设名
+---@field private storge table<any,string> 储存一系列通用存储外设名
+---@field private storgeList table<string,table<string,number|string>> 储存缓存中的物品位于何处，数量分别为多少
 local buffer = {}
 buffer.__index = buffer
 
@@ -15,6 +16,7 @@ function buffer:asBuffer(peripheralNames)
     print(textutils.serialise(peripheralNames))
     local o = {}
     o.storge = {}
+    o.storgeList = {}
     for _, peripheralName in pairs(peripheralNames) do
         local comStorge = peripheral.wrap(peripheralName)
         if not comStorge then
@@ -36,8 +38,9 @@ function buffer:input(fromNames)
     end
     -- fromNames是空的
     if not next(fromNames) then
-        error("fromNames is a space", 2)
+        error("fromNames is a something else", 2)
     end
+    -- 考虑到MC多模组环境下的复杂性，想要在物品输入前判断缓存是否有足够的空间容纳物品是不可能的。例如精妙存储，这个模组的容器内每格存储上限超过万亿也不是不可能，而且对于原版不可堆叠的物品也会适当提升其堆叠上限。这使得很难判断物品是否能塞入缓存。
     for _, sourceName in pairs(fromNames) do
         -- 因为getItemDetail很耗时间，所以我尽可能的不用它，这限制了很多事
         -- 提取该输入的所有原料到缓存中
@@ -62,6 +65,13 @@ function buffer:input(fromNames)
                         if tryTimes > maxTry then
                             break
                         end
+                        if not self.storgeList[itemInfo.name] then
+                            self.storgeList[itemInfo.name] = {}
+                            self.storgeList[itemInfo.name][storgeName] = 0
+                            self.storgeList[itemInfo.name]["Type"] = "item"
+                        end
+                        self.storgeList[itemInfo.name][storgeName] = self.storgeList[itemInfo.name][storgeName] +
+                            moveItemCount
                     end
                 end
             end
@@ -78,6 +88,13 @@ function buffer:input(fromNames)
                         if tryTimes > maxTry then
                             break
                         end
+                        if not self.storgeList[fluidInfo.name] then
+                            self.storgeList[fluidInfo.name] = {}
+                            self.storgeList[fluidInfo.name][storgeName] = 0
+                            self.storgeList[fluidInfo.name]["Type"] = "fluid"
+                        end
+                        self.storgeList[fluidInfo.name][storgeName] = self.storgeList[fluidInfo.name][storgeName] +
+                            moveFluidAmount
                     end
                 end
             end
@@ -121,51 +138,60 @@ end
 
 ---输出
 ---@param toName string 目标容器名
----@param itemName string 物品id
+---@param name string 素材id
 ---@param count number 需要转移的数量
 ---@return boolean
 ---@return string|nil
-function buffer:output(toName, itemName, count)
+function buffer:output(toName, name, count)
+    local sourcePerName = {}
     --确定是否有足够的物品
-    local itemList = self.inventory.list()
-    local k = 0 --储存当前容器物品数，暂时不知道怎么命名
-    for slot, item in pairs(itemList) do
-        if item.name == itemName then
-            k = k + item.count
+    if not self.storgeList[name] then
+        return false, "The raw material does not exist in the buffer"
+    end
+    local k = 0
+    for sourceName, num in pairs(self.storgeList[name]) do
+        table.insert(sourcePerName, sourceName)
+        k = k + num
+        if k >= count then
+            break
         end
     end
-    if k < count then
-        return false, "Not enough items"
+    if k <= count then
+        return false, "There is not enough of this material in the buffer"
     end
     --输出
-    local hasTransfer = 0 --记录已转移物品数，暂时不知道怎么命名
-    for slot, item in pairs(itemList) do
-        if item.name ~= itemName then
-            goto continue
+    local needTransfer = count
+    for _, sourceName in pairs(sourcePerName) do
+        local target = peripheral.wrap(toName)
+        if not target then
+            return false, "The target peripheral does not exist"
         end
-        --如果目的地容器的槽位可以存储的最大物品数量小于缓存，需要多次转移
-        while true do
-            local hgk = self.inventory.pushItems(toName, slot, count - hasTransfer) --记录这次转移了多少物品，暂时不知道怎么命名
-            hasTransfer = hasTransfer + hgk
-            if hgk == 0 then
-                break
+        -- 有个问题：怎样知道要转移的原料是流体还是物品？
+        -- 我决定在storgeList中加入一个特殊Key:Type储存这些信息
+        if self.storgeList[name].Type == "fluid" then
+            local b = target.pullFluid(sourceName, needTransfer, name)
+            needTransfer = needTransfer - b
+        elseif self.storgeList[name].Type == "item" then
+            local source = peripheral.wrap(sourceName)
+            -- 模块内部发生的错误
+            if not source then
+                error("something wrong", 2)
+            end
+            for slot, itemInfo in pairs(source.list()) do
+                if itemInfo.name == name then
+                    -- 注意这里还要处理目标容器是否有足够的空间储存，记得后面加上
+                    while true do
+                        local b = target.pullItems(sourceName, slot, needTransfer)
+                        needTransfer = needTransfer - b
+                        if b == 0 then
+                            break
+                        end
+                    end
+                end
             end
         end
-        ::continue::
     end
     return true, nil
-end
-
----就像正常的通用外设
----@return table<number, ccTweaked.peripherals.inventory.item>
-function buffer:list()
-    return self.inventory.list()
-end
-
----缓存大小
----@return number
-function buffer:size()
-    return buffer.inventory.size()
 end
 
 return buffer
