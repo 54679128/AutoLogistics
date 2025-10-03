@@ -199,11 +199,21 @@ function buffer:output(toName, name, count)
 end
 
 ---返回缓存中所储存的原料列表
----@return table<number,string>
+---@return table<number,string> {name = {type = "fluid"|"item",num = number},...}
 function buffer:list()
     local result = {}
-    for key, _ in pairs(self.storgeList) do
-        table.insert(result, key)
+    for name, inv in pairs(self.storgeList) do
+        if result[name] == nil then
+            result[name] = { type = nil, num = 0 }
+        end
+        for _, num in pairs(inv) do
+            if type(num) == "string" then
+                result[name].type = num
+                goto continue
+            end
+            result[name].num = result[name].num + num
+            ::continue::
+        end
     end
     return result
 end
