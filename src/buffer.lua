@@ -199,7 +199,7 @@ function buffer:output(toName, name, count)
 end
 
 ---返回缓存中所储存的原料列表
----@return table<number,string> {name = {type = "fluid"|"item",num = number},...}
+---@return table<string,table<string,number|string> {name = {type = "fluid"|"item",num = number},...}
 function buffer:list()
     local result = {}
     for name, inv in pairs(self.storgeList) do
