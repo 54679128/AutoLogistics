@@ -198,4 +198,14 @@ function buffer:output(toName, name, count)
     return true, nil
 end
 
+---返回缓存中所储存的原料列表
+---@return table<number,string>
+function buffer:list()
+    local result = {}
+    for key, _ in pairs(self.storgeList) do
+        table.insert(result, key)
+    end
+    return result
+end
+
 return buffer
