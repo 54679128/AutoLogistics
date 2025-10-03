@@ -7,7 +7,7 @@ local buffer = {}
 buffer.__index = buffer
 
 ---一个或一组容器作为缓存
----@param peripheralNames ccTweaked.peripherals.Inventory
+---@param peripheralNames string|table
 ---@return a54679128.Buffer
 function buffer:asBuffer(peripheralNames)
     if type(peripheralNames) == "string" then
