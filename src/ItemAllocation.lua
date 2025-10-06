@@ -52,24 +52,14 @@ local function isEmpty(peripheralNames)
     error("perppheralName is't a string or table", 2)
 end
 
-local function getMaterials(chest)
-    local list = chest.list()
-    local firstMaterName
-    local firstMaterSlot
-    local secondMaterName
-    local secondMaterSlot
-
-    for slot, item in pairs(list) do
-        if firstMaterName == nil then
-            firstMaterName = item.name
-            firstMaterSlot = slot
-        elseif firstMaterName and secondMaterName == nil and item.name ~= firstMaterName then
-            secondMaterName = item.name
-            secondMaterSlot = slot
-            break
-        end
+---返回一个或一系列容器中的原料名
+---@param storges string|table
+---@return unknown
+local function getMaterials(storges)
+    if type(storges) == "string" then
+        storges = { storges }
     end
-    return firstMaterName, secondMaterName
+    return nil
 end
 
 ---从缓存向一系列目标容器均匀转移物品
@@ -157,6 +147,8 @@ local function waitForReady(peripheralNames)
     print("ready")
 end
 
+---将各个容器按特征分类
+---@return table<string,table<number,string>>
 local function classifyByFeatures()
     local aChests = {}
     -- 用名字分类
@@ -295,6 +287,27 @@ local function configurationFileExist()
     return false
 end
 
+---均匀分配
+---@param buffer a54679128.Buffer
+---@param output table
+local function uniformAllocation(buffer, output)
+    local List = buffer:list()
+    local outputNum = 0
+    local outputList = {}
+    -- 暂时只考虑output不包含流体容器的情况
+    for _, dable in pairs(output) do
+        for _, name in pairs(dable) do
+            table.insert(outputList, name)
+        end
+        outputNum = outputNum + getLength(dable)
+    end
+    for _, outputName in pairs(outputList) do
+        for name, info in pairs(List) do
+            buffer:output(outputName, name, info.num / outputNum)
+        end
+    end
+end
+
 --配置输入输出
 ---@alias ConTable { input: string, buffer: string, output: table }
 local configuredTable
@@ -319,26 +332,21 @@ while true do
     if not configuredTable then
         error("unknown error")
     end
-    ---@cast configuredTable ConTable
-    local inputContainer = peripheral.wrap(configuredTable.input[1])
     ---@diagnostic disable-next-line: param-type-mismatch
-    local bufferContainer = Buffer:asBuffer(peripheral.wrap(configuredTable.buffer[1]))
+    local bufferContainer = Buffer:asBuffer(configuredTable.buffer)
     if not isEmpty(configuredTable.input) then
         waitForReady(configuredTable.input)
-        bufferContainer:input(configuredTable.input[1])
-        local firstMaterialName, secondMaterialName = getMaterials(bufferContainer.inventory)
-        print(firstMaterialName)
-        print(secondMaterialName)
-        local tempFirst = {}
-        local tempSecond = {}
-        for _, name in pairs(configuredTable.output[1]) do
-            table.insert(tempFirst, peripheral.wrap(name))
+        bufferContainer:input(configuredTable.input)
+        -- 我希望getMaterials能返回所有的原料，但是我对于返回一个表还是返回一系列值有点烦恼
+        -- 决定了，让buffer模块自己返回一个表
+        local materialList = bufferContainer:list()
+        for _, name in pairs(materialList) do
+            print(name)
         end
-        for _, name in pairs(configuredTable.output[2]) do
-            table.insert(tempSecond, peripheral.wrap(name))
-        end
-        uniformToTarget(firstMaterialName, bufferContainer, tempFirst)
-        uniformToTarget(secondMaterialName, bufferContainer, tempSecond)
+        -- 之后是策略部分，提供buffer对象和一系列输出对象，让策略自行决定如何分配
+        -- 现在，我只写一个简单的均匀分配
+        --uniformToTarget(secondMaterialName, bufferContainer, tempSecond)
+        uniformAllocation(Buffer, configuredTable.output)
     end
     sleep(2)
 end
