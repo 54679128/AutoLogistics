@@ -346,7 +346,7 @@ while true do
         -- 之后是策略部分，提供buffer对象和一系列输出对象，让策略自行决定如何分配
         -- 现在，我只写一个简单的均匀分配
         --uniformToTarget(secondMaterialName, bufferContainer, tempSecond)
-        uniformAllocation(Buffer, configuredTable.output)
+        uniformAllocation(bufferContainer, configuredTable.output)
     end
     sleep(2)
 end
