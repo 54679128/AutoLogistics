@@ -3,6 +3,7 @@
 ---@class a54679128.Buffer
 ---@field private storge table<any,string> 储存一系列通用存储外设名
 ---@field private storgeList table<string,table<string,number|string>> 储存缓存中的物品位于何处，数量分别为多少
+---@field private updateStorgeList function 用于更新storgeList表，只因在模块内部使用
 local buffer = {}
 buffer.__index = buffer
 
