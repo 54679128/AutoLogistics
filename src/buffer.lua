@@ -27,6 +27,69 @@ function buffer:asBuffer(peripheralNames)
     return setmetatable(o, buffer)
 end
 
+---更新对应buffer对象的StorgeList
+---@param bufferClass a54679128.Buffer
+---@param materialName string
+---@param materialType string 一般来说只为"item"或"fluid"
+---@param materialQuantity number 原料数量，具体操作取决于mode参数的值
+---@param storgeName string
+---@param mode "add"|"remove"|"set" 当storgeList中不存在该项时，该参数无用
+---@return boolean success 是否成功更新
+---@return nil|string errorMessage
+local function updateStorgeList(bufferClass, materialName, materialType, materialQuantity, storgeName, mode)
+    --一系列的参数验证
+    if type(bufferClass) ~= "table" and bufferClass.storgeList then
+        return false, "bufferClass is't table"
+    end
+
+    if type(materialName) ~= "string" or materialName == "" then
+        return false, "Invalid materialName"
+    end
+
+    if materialType ~= "item" and materialType ~= "fluid" then
+        return false, "materialType must be 'item' or 'fluid'"
+    end
+
+    if type(materialQuantity) ~= "number" then
+        return false, "materialQuantity must be a non-negative number"
+    end
+
+    if type(storgeName) ~= "string" then
+        return false, "Invalid storgeName"
+    end
+
+    local validModes = { add = true, remove = true, set = true }
+    if not validModes[mode] then
+        return false, "mode must be 'add', 'remove', or 'set'"
+    end
+
+
+    local storageList = bufferClass.storgeList
+    if not storageList[materialName] then
+        storageList[materialName] = { Type = materialType }
+        storageList[materialName][storgeName] = materialQuantity
+        return true, nil
+    end
+    local currentValue = storageList[materialName][storgeName]
+    local newValue
+    if mode == "add" then
+        newValue = currentValue + materialQuantity
+    elseif mode == "remove" then
+        newValue = currentValue - materialQuantity
+    elseif mode == "set" then
+        newValue = materialQuantity
+    else
+        error("Why you see this?", 2)
+    end
+    if newValue < 0 then
+        return false,
+            ("Operation would result in negative quantity: %s %d from %s.%s (current: %d, result: %d)"):format(mode,
+                materialQuantity, materialName, storgeName, currentValue, newValue)
+    end
+    storageList[materialName][storgeName] = newValue
+    return true, nil
+end
+
 ---从一个或一组容器中向缓存中输入素材
 ---暂时想不到如何检测是否有足够的空间储存输入素材
 ---@param fromNames string|table<any,string> 储存待输入素材的容器名
