@@ -2,7 +2,7 @@
 
 ---@class a54679128.Buffer
 ---@field private storge table<any,string> 储存一系列通用存储外设名
----@field storgeList table<string,table<string,number|string>> 储存缓存中的物品位于何处，数量分别为多少
+---@field private storgeList table<string,table<string,number|string>> 储存缓存中的物品位于何处，数量分别为多少
 local buffer = {}
 buffer.__index = buffer
 
