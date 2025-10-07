@@ -36,7 +36,7 @@ end
 ---@param mode "add"|"remove"|"set" 当storgeList中不存在该项时，该参数无用
 ---@return boolean success 是否成功更新
 ---@return nil|string errorMessage
-local function updateStorgeList(bufferClass, materialName, materialType, materialQuantity, storgeName, mode)
+function buffer:updateStorgeList(bufferClass, materialName, materialType, materialQuantity, storgeName, mode)
     --一系列的参数验证
     if type(bufferClass) ~= "table" and bufferClass.storgeList then
         return false, "bufferClass is't table"
