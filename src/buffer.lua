@@ -28,8 +28,8 @@ function buffer:asBuffer(peripheralNames)
     return setmetatable(o, buffer)
 end
 
----更新对应buffer对象的StorgeList
----@param bufferClass a54679128.Buffer
+---更新StorgeList
+---@param storageList table
 ---@param materialName string
 ---@param materialType string 一般来说只为"item"或"fluid"
 ---@param materialQuantity number 原料数量，具体操作取决于mode参数的值
@@ -37,10 +37,10 @@ end
 ---@param mode "add"|"remove"|"set" 当storgeList中不存在该项时，该参数无用
 ---@return boolean success 是否成功更新
 ---@return nil|string errorMessage
-function buffer:updateStorgeList(bufferClass, materialName, materialType, materialQuantity, storgeName, mode)
+function buffer:updateStorgeList(storageList, materialName, materialType, materialQuantity, storgeName, mode)
     --一系列的参数验证
-    if type(bufferClass) ~= "table" and bufferClass.storgeList then
-        return false, "bufferClass is't table"
+    if type(storageList) ~= "table" then
+        return false, "storageList is't table"
     end
 
     if type(materialName) ~= "string" or materialName == "" then
@@ -64,8 +64,6 @@ function buffer:updateStorgeList(bufferClass, materialName, materialType, materi
         return false, "mode must be 'add', 'remove', or 'set'"
     end
 
-
-    local storageList = bufferClass.storgeList
     if not storageList[materialName] then
         storageList[materialName] = { Type = materialType }
         storageList[materialName][storgeName] = materialQuantity
