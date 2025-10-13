@@ -3,7 +3,6 @@
 ---@class a54679128.Buffer
 ---@field private storge table<any,string> 储存一系列通用存储外设名
 ---@field private storgeList table<string,table<string,number|string>> 储存缓存中的物品位于何处，数量分别为多少
----@field private updateStorgeList function 用于更新storgeList表，只因在模块内部使用
 local buffer = {}
 buffer.__index = buffer
 
@@ -37,7 +36,7 @@ end
 ---@param mode "add"|"remove"|"set" 当storgeList中不存在该项时，该参数无用
 ---@return boolean success 是否成功更新
 ---@return nil|string errorMessage
-function buffer:updateStorgeList(storageList, materialName, materialType, materialQuantity, storgeName, mode)
+local function updateStorgeList(storageList, materialName, materialType, materialQuantity, storgeName, mode)
     --一系列的参数验证
     if type(storageList) ~= "table" then
         return false, "storageList is't table"
