@@ -1,13 +1,13 @@
 -- 这是一个接口模块
 
 ---@class a546.CommandInvoker
----@field commands a546.TransferCommand[]|a546.TransferCommandBase[]
+---@field commands a546.TransferCommandBase[]
 local CommandInvoker = {
     commands = {}
 }
 
 --- 向指令组中添加指令
----@param command a546.TransferCommand|a546.TransferCommandBase
+---@param command a546.TransferCommandBase
 function CommandInvoker:addCommand(command)
     table.insert(self.commands, command)
 end
