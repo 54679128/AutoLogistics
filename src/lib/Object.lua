@@ -1,4 +1,3 @@
----@module "classic"
 --
 -- classic
 --
@@ -9,9 +8,9 @@
 --
 
 ---@class Object 基类
+---@field super Object|nil 父类
 local Object = {}
 Object.__index = Object
-
 
 function Object:new()
 end
@@ -19,7 +18,6 @@ end
 --- 返回继承的类对象
 ---@generic T
 ---@param self `T`
----@return T class
 ---@nodiscard
 function Object:extend()
   local cls = {}
