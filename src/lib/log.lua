@@ -10,7 +10,7 @@
 ---@field usecolor boolean
 ---@field outfile string
 ---@field level "trace"|"debug"|"info"|"warn"|"error"|"fatal"
----@field trance fun(...:string|number)
+---@field trace fun(...:string|number)
 ---@field debug fun(...:string|number)
 ---@field info fun(...:string|number)
 ---@field warn fun(...:string|number)
