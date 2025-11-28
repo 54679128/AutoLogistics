@@ -28,7 +28,7 @@ local TCSlotToInventory = base:extend()
 TCSlotToInventory:register("SlotToInventory", worker)
 
 
----@cast TCSlotToInventory +fun(sourcePeripheralName:string, sourceSlot:number, targetPeripheralName:number, limit?:number):a546.TCSlotToInventory
+---@cast TCSlotToInventory +fun(sourcePeripheralName:string, sourceSlot:number, targetPeripheralName:string, limit?:number):a546.TCSlotToInventory
 function TCSlotToInventory:new(sourcePeripheralName, sourceSlot, targetPeripheralName, limit)
     ---@diagnostic disable-next-line: redundant-parameter
     self.super.new(self, sourcePeripheralName, targetPeripheralName)
