@@ -6,7 +6,16 @@
 -- This library is free software; you can redistribute it and/or modify it
 -- under the terms of the MIT license. See LICENSE for details.
 --
-
+---@class log
+---@field usecolor boolean
+---@field outfile string
+---@field level "trace"|"debug"|"info"|"warn"|"error"|"fatal"
+---@field trance fun(...:string|number)
+---@field debug fun(...:string|number)
+---@field info fun(...:string|number)
+---@field warn fun(...:string|number)
+---@field error fun(...:string|number)
+---@field fatal fun(...:string|number)
 local log = { _version = "0.1.0" }
 
 log.usecolor = true
@@ -23,7 +32,7 @@ local modes = {
     { name = "fatal", color = "\27[35m", },
 }
 
-
+---@type table<number,table>
 local levels = {}
 for i, v in ipairs(modes) do
     levels[v.name] = i
@@ -54,6 +63,7 @@ end
 
 for i, x in ipairs(modes) do
     local nameupper = x.name:upper()
+    ---@diagnostic disable-next-line: assign-type-mismatch
     log[x.name] = function(...)
         -- Return early if we're below the log level
         if i < levels[log.level] then
