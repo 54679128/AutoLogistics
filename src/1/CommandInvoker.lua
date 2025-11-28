@@ -35,13 +35,15 @@ function CommandInvoker:processAll()
             -- 找到或自己写了一个日志模块后这里加上相应日志代码
             error(("command %s does't exists"):format(command.commandType))
         end
-        local ok, errOrResult = pcall(handler, command)
-        if not ok then
+        --local ok, errOrResult = pcall(handler, command)
+
+        local k = table.pack(pcall(handler, command))
+        if not k[1] then
             -- 找到或自己写了一个日志模块后这里加上相应日志代码
             print(("Command %s execution failed"):format(command.commandType))
-            print(("error message: %s"):format(tostring(errOrResult)))
-            table.insert(result, errOrResult)
+            print(("error message: %s"):format(tostring(k[2])))
         end
+        table.insert(result, k[3])
     end
     return result
 end
