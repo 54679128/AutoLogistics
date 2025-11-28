@@ -1,4 +1,4 @@
-require("_stesuo")
+require("_steup")
 
 local invoke = require("CommandInvoker")
 local command = require("TransferCommand.TCItemInventory")
@@ -6,10 +6,10 @@ local command = require("TransferCommand.TCItemInventory")
 
 local testInvoke = invoke:new()
 
-testInvoke:addCommand(command("left", "top"))
-testInvoke:addCommand(command("top", "right"))
-testInvoke:addCommand(command("right", "bottom"))
-testInvoke:addCommand(command("bottom", "left"))
-while true do
-    testInvoke:processAll()
-end
+testInvoke:addCommand(command("left", "right"))
+
+testInvoke:addCommand(command("right", "left"))
+
+local result = testInvoke:processAll()
+
+print(textutils.serialise(result, { allow_repetitions = true }))
