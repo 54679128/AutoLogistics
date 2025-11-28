@@ -27,12 +27,12 @@ local TCFluid = base:extend()
 
 TCFluid:register("Fluid", worker)
 
----@cast TCFluid +fun(source:string, target:string, name:string, limit?:number):a546.TCFluid
-function TCFluid:new(source, target, name, limit)
+---@cast TCFluid +fun(source:string, target:string, fluidName?:string, limit?:number):a546.TCFluid
+function TCFluid:new(source, target, fluidName, limit)
     ---@diagnostic disable-next-line: redundant-parameter
     self.super.new(self, source, target)
-    self.name = name
-    self.limit = limit
+    self.fluidName = fluidName
+    self.limit = limit or 5000000
 end
 
 return TCFluid
