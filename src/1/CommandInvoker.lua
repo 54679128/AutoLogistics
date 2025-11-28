@@ -25,20 +25,25 @@ function CommandInvoker:clear()
     self.commands = {}
 end
 
+--- 执行所有命令
+---@return table<number,any>
 function CommandInvoker:processAll()
+    local result = {}
     for _, command in ipairs(self.commands) do
         local handler = command.handler
         if not handler then
             -- 找到或自己写了一个日志模块后这里加上相应日志代码
             error(("command %s does't exists"):format(command.commandType))
         end
-        local ok, err = pcall(handler, command)
+        local ok, errOrResult = pcall(handler, command)
         if not ok then
             -- 找到或自己写了一个日志模块后这里加上相应日志代码
             print(("Command %s execution failed"):format(command.commandType))
-            print(("error message: %s"):format(tostring(err)))
+            print(("error message: %s"):format(tostring(errOrResult)))
+            table.insert(result, errOrResult)
         end
     end
+    return result
 end
 
 return CommandInvoker
