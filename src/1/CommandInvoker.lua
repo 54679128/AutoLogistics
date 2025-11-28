@@ -1,23 +1,18 @@
--- 这是一个接口模块
+local Object = require("lib.Object")
 
 ---@class a546.CommandInvoker
 ---@field commands a546.TransferCommandBase[]
-local CommandInvoker = {
-    commands = {}
-}
+local CommandInvoker = Object:extend()
+
+---@cast CommandInvoker +fun():a546.CommandInvoker
+function CommandInvoker:new()
+    self.commands = {}
+end
 
 --- 向指令组中添加指令
 ---@param command a546.TransferCommandBase
 function CommandInvoker:addCommand(command)
     table.insert(self.commands, command)
-end
-
----@return a546.CommandInvoker
-function CommandInvoker:new(o)
-    o = o or { commands = {} }
-    self.__index = self
-    setmetatable(o, self)
-    return o
 end
 
 -- 清除所有指令
