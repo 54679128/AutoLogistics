@@ -1,6 +1,6 @@
 ---@module "MaterialEntry"
 
-local Object = require("src.lib.Object")
+local Object = require("lib.Object")
 local expect = require("cc.expect")
 
 ---@class a546.MaterialEntry:Object

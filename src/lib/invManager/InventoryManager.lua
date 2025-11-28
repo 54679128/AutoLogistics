@@ -1,6 +1,6 @@
 ---@module "InventoryManager"
 
-local Object = require("src.lib.Object")
+local Object = require("lib.Object")
 local expect = require("cc.expect")
 local MaterialEntry = require("MaterialEntry")
 
