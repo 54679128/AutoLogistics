@@ -17,7 +17,7 @@ invoker:addCommand(TCSlotToInventory("left", "right", 3, -100))
 -- 执行
 local results = invoker:processAll()
 
-print("TCSlotToInventory 测试结果:")
+print("TCSlotToInventory test result:")
 print(textutils.serialise(results, { allow_repetitions = true }))
 
 -- 预期：
