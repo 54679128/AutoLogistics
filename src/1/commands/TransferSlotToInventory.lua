@@ -1,7 +1,7 @@
-local base = require("TransferCommand.TransferCommandBase")
+local base = require("TransferCommandBase")
 local log = require("lib.log")
 
----@param command a546.TCSlotToInventory
+---@param command a546.TransferSlotToInventory
 ---@return boolean 是否成功
 ---@return number|string 相关信息
 local function worker(command)
@@ -28,16 +28,16 @@ local function worker(command)
     return true, result
 end
 
----@class a546.TCSlotToInventory:a546.TransferCommandBase
+---@class a546.TransferSlotToInventory:a546.TransferCommandBase
 ---@field sourceSlot number
 ---@field limit number|nil
-local TCSlotToInventory = base:extend()
+local TransferSlotToInventory = base:extend()
 
-TCSlotToInventory:register("SlotToInventory", worker)
+TransferSlotToInventory:register("SlotToInventory", worker)
 
 
----@cast TCSlotToInventory +fun(sourcePeripheralName:string, targetPeripheralName:string, sourceSlot:number, limit?:number):a546.TCSlotToInventory
-function TCSlotToInventory:new(sourcePeripheralName, targetPeripheralName, sourceSlot, limit)
+---@cast TransferSlotToInventory +fun(sourcePeripheralName:string, targetPeripheralName:string, sourceSlot:number, limit?:number):a546.TransferSlotToInventory
+function TransferSlotToInventory:new(sourcePeripheralName, targetPeripheralName, sourceSlot, limit)
     ---@diagnostic disable-next-line: redundant-parameter
     self.super.new(self, sourcePeripheralName, targetPeripheralName)
     self.sourceSlot = sourceSlot
@@ -48,4 +48,4 @@ function TCSlotToInventory:new(sourcePeripheralName, targetPeripheralName, sourc
     end
 end
 
-return TCSlotToInventory
+return TransferSlotToInventory

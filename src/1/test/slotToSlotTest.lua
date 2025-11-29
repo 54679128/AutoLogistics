@@ -1,7 +1,7 @@
 require("_steup")
 
 local CommandInvoker = require("CommandInvoker")
-local TCItemSlot = require("TransferCommand.TCItemSlot")
+local TCItemSlot = require("commands.TransferSlotToSlot")
 
 -- 创建命令执行器
 local invoker = CommandInvoker()

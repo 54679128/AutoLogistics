@@ -1,7 +1,7 @@
 require("_steup")
 
 local CommandInvoker = require("CommandInvoker")
-local TCSlotToInventory = require("TransferCommand.TCSlotToInventory")
+local TCSlotToInventory = require("commands.TransferSlotToInventory")
 
 local invoker = CommandInvoker()
 

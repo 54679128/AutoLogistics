@@ -1,8 +1,8 @@
-local base = require("TransferCommand.TransferCommandBase")
+local base = require("TransferCommandBase")
 local log = require("lib.log")
 
 ---……
----@param command a546.TCItemSlot
+---@param command a546.TransferSlotToSlot
 ---@return boolean 是否成功
 ---@return number|string 相关信息
 local function transferItemSlot(command)
@@ -29,19 +29,19 @@ local function transferItemSlot(command)
     return true, result - 9
 end
 
----@class a546.TCItemSlot:a546.TransferCommandBase
-local TCItemSlot = base:extend()
+---@class a546.TransferSlotToSlot:a546.TransferCommandBase
+local TransferSlotToSlot = base:extend()
 
-TCItemSlot:register("ItemSlot", transferItemSlot)
+TransferSlotToSlot:register("ItemSlot", transferItemSlot)
 
 --- 添加 ItemSlot 命令，将物品从指定容器槽位移动到到另一个指定的容器槽位
----@cast TCItemSlot +fun(sourcePeripheralName:string, sourceSlot:number, targetPeripheralName:string, targetSlot:number, limit?:number):a546.TCItemSlot
+---@cast TransferSlotToSlot +fun(sourcePeripheralName:string, sourceSlot:number, targetPeripheralName:string, targetSlot:number, limit?:number):a546.TransferSlotToSlot
 ---@param sourcePeripheralName string
 ---@param sourceSlot number
 ---@param targetPeripheralName string
 ---@param targetSlot number
 ---@param limit? number
-function TCItemSlot:new(sourcePeripheralName, sourceSlot, targetPeripheralName, targetSlot, limit)
+function TransferSlotToSlot:new(sourcePeripheralName, sourceSlot, targetPeripheralName, targetSlot, limit)
     ---@diagnostic disable-next-line: redundant-parameter
     self.super.new(self, sourcePeripheralName, targetPeripheralName)
     self.sourceSlot = sourceSlot
@@ -53,4 +53,4 @@ function TCItemSlot:new(sourcePeripheralName, sourceSlot, targetPeripheralName, 
     end
 end
 
-return TCItemSlot
+return TransferSlotToSlot

@@ -1,7 +1,7 @@
-local base = require("TransferCommand.TransferCommandBase")
+local base = require("TransferCommandBase")
 local log = require("lib.log")
 
----@param command a546.TCFluid
+---@param command a546.TransferFluid
 ---@return boolean
 ---@return number|string
 local function worker(command)
@@ -25,15 +25,15 @@ local function worker(command)
     return true, result
 end
 
----@class a546.TCFluid:a546.TransferCommandBase
+---@class a546.TransferFluid:a546.TransferCommandBase
 ---@field limit number
 ---@field fluidName string|nil
-local TCFluid = base:extend()
+local TransferFluid = base:extend()
 
-TCFluid:register("Fluid", worker)
+TransferFluid:register("Fluid", worker)
 
----@cast TCFluid +fun(source:string, target:string, limit?:number, fluidName?:string):a546.TCFluid
-function TCFluid:new(source, target, limit, fluidName)
+---@cast TransferFluid +fun(source:string, target:string, limit?:number, fluidName?:string):a546.TransferFluid
+function TransferFluid:new(source, target, limit, fluidName)
     ---@diagnostic disable-next-line: redundant-parameter
     self.super.new(self, source, target)
     self.fluidName = fluidName
@@ -44,4 +44,4 @@ function TCFluid:new(source, target, limit, fluidName)
     end
 end
 
-return TCFluid
+return TransferFluid
