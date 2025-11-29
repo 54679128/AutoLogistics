@@ -40,7 +40,7 @@ function CommandInvoker:processAll()
             -- 找到或自己写了一个日志模块后这里加上相应日志代码
             --print(("Command %s execution failed"):format(command.commandType))
             --print(("error message: %s"):format(tostring(k[2])))
-            log.warn(("Command %s execution failed"):format(command.commandType))
+            log.warn(("Command %s execution failed: %s"):format(command.commandType, tostring(k[2])))
         end
         log.trace(("Command %s success"):format(command.commandType))
         table.insert(result, k[3])
