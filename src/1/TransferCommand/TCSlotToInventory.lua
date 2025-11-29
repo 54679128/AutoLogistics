@@ -9,11 +9,15 @@ local function worker(command)
         return false, ("can't find peripheral %s"):format(command.sourcePeripheralName)
     end
     local result = 0
+    local needTransfer = command.limit
     while true do
         local actuallyTransfer = sourcePeripheral.pushItems(command.targetPeripheralName, command.sourceSlot,
-            command.limit)
+            needTransfer)
+        if command.limit then
+            needTransfer = needTransfer - actuallyTransfer
+        end
         result = result + actuallyTransfer
-        if actuallyTransfer == 0 then
+        if actuallyTransfer == 0 or needTransfer <= 0 then
             break
         end
     end
@@ -28,11 +32,12 @@ local TCSlotToInventory = base:extend()
 TCSlotToInventory:register("SlotToInventory", worker)
 
 
----@cast TCSlotToInventory +fun(sourcePeripheralName:string, sourceSlot:number, targetPeripheralName:string, limit?:number):a546.TCSlotToInventory
-function TCSlotToInventory:new(sourcePeripheralName, sourceSlot, targetPeripheralName, limit)
+---@cast TCSlotToInventory +fun(sourcePeripheralName:string, targetPeripheralName:string, sourceSlot:number, limit?:number):a546.TCSlotToInventory
+function TCSlotToInventory:new(sourcePeripheralName, targetPeripheralName, sourceSlot, limit)
     ---@diagnostic disable-next-line: redundant-parameter
     self.super.new(self, sourcePeripheralName, targetPeripheralName)
     self.limit = limit
+    self.sourceSlot = sourceSlot
 end
 
 return TCSlotToInventory
