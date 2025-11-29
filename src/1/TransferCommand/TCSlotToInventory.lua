@@ -44,7 +44,7 @@ function TCSlotToInventory:new(sourcePeripheralName, targetPeripheralName, sourc
     self.limit = limit
     if limit and limit < 0 then
         self.limit = nil
-        log.error(("limit must > 0 or nil,but get %d"):format(limit))
+        log.warn(("limit must > 0 or nil,but get %d"):format(limit))
     end
 end
 

@@ -40,7 +40,7 @@ function TCFluid:new(source, target, limit, fluidName)
     self.limit = limit or 5000000
     if self.limit < 0 then
         self.limit = 5000000
-        log.error(("limit must > 0, but get %d"):format(limit))
+        log.warn(("limit must > 0, but get %d"):format(limit))
     end
 end
 
