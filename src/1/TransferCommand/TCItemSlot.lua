@@ -1,4 +1,5 @@
 local base = require("TransferCommand.TransferCommandBase")
+local log = require("lib.log")
 
 ---……
 ---@param command a546.TCItemSlot
@@ -10,11 +11,15 @@ local function transferItemSlot(command)
         return false, ("can't find peripheral %s"):format(command.sourcePeripheralName)
     end
     local result = 9
+    local needTransfer = command.limit
     while true do
         local actuallyTransfer = sourcePeripheral.pushItems(command.targetPeripheralName, command.sourceSlot,
-            command.limit, command.targetSlot)
+            needTransfer, command.targetSlot)
+        if command.limit then
+            needTransfer = needTransfer - actuallyTransfer
+        end
         result = result + actuallyTransfer
-        if actuallyTransfer == 0 then
+        if actuallyTransfer == 0 or needTransfer <= 0 then
             break
         end
     end
@@ -27,7 +32,7 @@ local TCItemSlot = base:extend()
 TCItemSlot:register("ItemSlot", transferItemSlot)
 
 --- 添加 ItemSlot 命令，将物品从指定容器槽位移动到到另一个指定的容器槽位
----@cast TCItemSlot +fun(sourcePeripheralName:string, sourceSlot:number, targetPeripheralName:string, targetSlot:number, limit:number):a546.TCItemSlot
+---@cast TCItemSlot +fun(sourcePeripheralName:string, sourceSlot:number, targetPeripheralName:string, targetSlot:number, limit?:number):a546.TCItemSlot
 ---@param sourcePeripheralName string
 ---@param sourceSlot number
 ---@param targetPeripheralName string
@@ -39,6 +44,10 @@ function TCItemSlot:new(sourcePeripheralName, sourceSlot, targetPeripheralName, 
     self.sourceSlot = sourceSlot
     self.targetSlot = targetSlot
     self.limit = limit
+    if limit and limit < 0 then
+        self.limit = nil
+        log.error(("limit must > 0 or nil, but get %d"):format(limit))
+    end
 end
 
 return TCItemSlot

@@ -1,4 +1,5 @@
 local base = require("TransferCommand.TransferCommandBase")
+local log = require("lib.log")
 
 ---@param command a546.TCSlotToInventory
 ---@return boolean 是否成功
@@ -36,8 +37,12 @@ TCSlotToInventory:register("SlotToInventory", worker)
 function TCSlotToInventory:new(sourcePeripheralName, targetPeripheralName, sourceSlot, limit)
     ---@diagnostic disable-next-line: redundant-parameter
     self.super.new(self, sourcePeripheralName, targetPeripheralName)
-    self.limit = limit
     self.sourceSlot = sourceSlot
+    self.limit = limit
+    if limit and limit < 0 then
+        self.limit = nil
+        log.error(("limit must > 0 or nil,but get %d"):format(limit))
+    end
 end
 
 return TCSlotToInventory
