@@ -19,7 +19,10 @@ local function transferItemSlot(command)
             needTransfer = needTransfer - actuallyTransfer
         end
         result = result + actuallyTransfer
-        if actuallyTransfer == 0 or needTransfer <= 0 then
+        if actuallyTransfer == 0 then
+            break
+        end
+        if needTransfer and needTransfer < 0 then
             break
         end
     end
