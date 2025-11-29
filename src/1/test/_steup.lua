@@ -1,3 +1,5 @@
+-- steup不是setup的错误拼写
+
 local function insertPath(path)
     package.path = ("%s;%s"):format(path, package.path)
 end
