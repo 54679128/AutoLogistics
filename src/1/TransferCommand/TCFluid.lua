@@ -1,4 +1,5 @@
 local base = require("TransferCommand.TransferCommandBase")
+local log = require("lib.log")
 
 ---@param command a546.TCFluid
 ---@return boolean
@@ -9,11 +10,15 @@ local function worker(command)
         return false, ("can't find peripheral %s"):format(command.sourcePeripheralName)
     end
     local result = 0
+    local needTransfer = command.limit
     while true do
-        local actuallyTransfer = sourcePeripheral.pushFluid(command.targetPeripheralName, command.limit,
+        local actuallyTransfer = sourcePeripheral.pushFluid(command.targetPeripheralName, needTransfer,
             command.fluidName)
+        if command.limit then
+            needTransfer = needTransfer - actuallyTransfer
+        end
         result = result + actuallyTransfer
-        if actuallyTransfer == 0 then
+        if actuallyTransfer == 0 or needTransfer <= 0 then
             break
         end
     end
@@ -21,18 +26,22 @@ local function worker(command)
 end
 
 ---@class a546.TCFluid:a546.TransferCommandBase
----@field limit number|nil
+---@field limit number
 ---@field fluidName string|nil
 local TCFluid = base:extend()
 
 TCFluid:register("Fluid", worker)
 
----@cast TCFluid +fun(source:string, target:string, fluidName?:string, limit?:number):a546.TCFluid
-function TCFluid:new(source, target, fluidName, limit)
+---@cast TCFluid +fun(source:string, target:string, limit?:number, fluidName?:string):a546.TCFluid
+function TCFluid:new(source, target, limit, fluidName)
     ---@diagnostic disable-next-line: redundant-parameter
     self.super.new(self, source, target)
     self.fluidName = fluidName
     self.limit = limit or 5000000
+    if self.limit < 0 then
+        self.limit = 5000000
+        log.error(("limit must > 0, but get %d"):format(limit))
+    end
 end
 
 return TCFluid
