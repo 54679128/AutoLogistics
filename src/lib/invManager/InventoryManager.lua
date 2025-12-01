@@ -43,6 +43,12 @@ function InventoryManager:remove(peripheralName)
     self.storages[peripheralName] = nil
 end
 
+--- 字面意思，返回内部字段
+---@return table<string, a546.MaterialEntry>
+function InventoryManager:getAll()
+    return self.storages
+end
+
 --- 更新表中某项
 ---@param peripheralName string
 ---@param materialItem a546.MaterialEntry
