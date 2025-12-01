@@ -8,6 +8,7 @@ local MaterialEntry = require("lib.invManager.MaterialEntry")
 ---@field storages {[string]:a546.MaterialEntry}
 local InventoryManager = Object:extend()
 
+---@cast InventoryManager +fun():a546.InventoryManager
 function InventoryManager:new()
     self.storages = {}
 end
