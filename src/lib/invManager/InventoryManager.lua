@@ -2,7 +2,7 @@
 
 local Object = require("lib.Object")
 local expect = require("cc.expect")
-local MaterialEntry = require("MaterialEntry")
+local MaterialEntry = require("lib.invManager.MaterialEntry")
 
 ---@class a546.InventoryManager:Object
 ---@field storages {[string]:a546.MaterialEntry}
