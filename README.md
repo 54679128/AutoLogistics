@@ -128,4 +128,4 @@ invoker:processAll()
 
 ## 🙌 贡献与反馈
 
-欢迎提交 Issue 或 PR！
+本项目仍在持续开发中。如果你有兴趣参与，欢迎通过 Issue 或 Pull Request 提交改进。
