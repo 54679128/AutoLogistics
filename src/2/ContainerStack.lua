@@ -106,8 +106,18 @@ end
 ---@param index number|number[]|string|string[]
 ---@return number id
 function ContainerStack:lock(index)
+    -- 参数处理
     if type(index) == "number" or type(index) == "string" then
         index = { index }
+    end
+    -- 检查物品是否存在
+    for _, slotOrName in pairs(index) do
+        if not self.slots[slotOrName] then
+            local errMessage = ("Slot %d does't have item or name %s does't exist"):format(slotOrName,
+            tostring(slotOrName))
+            log.error(errMessage)
+            error(errMessage)
+        end
     end
     local targetLockId = os.epoch("local")
     self.locks[targetLockId] = {}
