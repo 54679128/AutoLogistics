@@ -147,6 +147,10 @@ function ContainerStack:lockByCount(index)
         tLock[v.slotOrName] = util.copyTable(sourceStack)
         sourceStack.count = sourceStack.count - v.countOrAmount
         tLock[v.slotOrName].count = v.countOrAmount
+        -- 如果 sourceStack.count 为零，可以直接删掉
+        if sourceStack.count == 0 then
+            self.slots[v.slotOrName] = nil
+        end
     end
     return targetLockId
 end
