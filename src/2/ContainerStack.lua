@@ -102,7 +102,7 @@ function ContainerStack:getLock()
     return util.copyTable(self.locks)
 end
 
---- 从本容器中可用储存中移除指定槽位/名称，并转移至不可用/锁定储存。这个函数应该改名为lock，但为了其它模块着想，暂时不改。
+--- 从本容器中可用储存中移除指定槽位/名称，并转移至不可用/锁定储存。
 ---@param index number|number[]|string|string[]
 ---@return number id
 function ContainerStack:lock(index)
@@ -114,7 +114,7 @@ function ContainerStack:lock(index)
     for _, slotOrName in pairs(index) do
         if not self.slots[slotOrName] then
             local errMessage = ("Slot %d does't have item or name %s does't exist"):format(slotOrName,
-            tostring(slotOrName))
+                tostring(slotOrName))
             log.error(errMessage)
             error(errMessage)
         end
