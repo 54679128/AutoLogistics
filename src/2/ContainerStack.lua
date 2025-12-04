@@ -105,7 +105,7 @@ end
 --- 从本容器中可用储存中移除指定槽位/名称，并转移至不可用/锁定储存。这个函数应该改名为lock，但为了其它模块着想，暂时不改。
 ---@param index number|number[]|string|string[]
 ---@return number id
-function ContainerStack:extract(index)
+function ContainerStack:lock(index)
     if type(index) == "number" or type(index) == "string" then
         index = { index }
     end
@@ -120,10 +120,10 @@ function ContainerStack:extract(index)
     return targetLockId
 end
 
---- 从本容器中减少指定槽位/名称的物品/流体的数量，并转移至不可用/锁定储存。这个函数应该改名为lock，但为了其它模块着想，暂时不改。
+--- 从本容器中减少指定槽位/名称的物品/流体的数量，并转移至不可用/锁定储存。
 ---@param index {slotOrName:string|number,countOrAmount:number}[]
 ---@return number id
-function ContainerStack:extractByCount(index)
+function ContainerStack:lockByCount(index)
     -- 检查是否能够执行要求的操作
     for i, v in pairs(index) do
         if not self.slots[v.slotOrName] then
@@ -151,7 +151,7 @@ function ContainerStack:extractByCount(index)
     return targetLockId
 end
 
---- 使用 extract 系列函数给出的 id 解锁物品或流体
+--- 使用 lock 系列函数给出的 id 解锁物品或流体
 ---@param id number
 function ContainerStack:unLock(id)
     local processTable = self.locks[id]
@@ -173,23 +173,6 @@ function ContainerStack:unLock(id)
     end
     -- 处理完毕，丢弃
     self.locks[id] = nil
-end
-
---- 合并指定的 a546.ContainerStack 。两个 ContainerStack 需要拥有相同的 peripheralName。不处理冲突等复杂情况，只在 有空位时合并。
----@param tCS a546.ContainerStack
----@return a546.ContainerStack|nil
----@return string|nil
----@deprecated
-function ContainerStack:merge(tCS)
-    if tCS.peripheralName ~= self.peripheralName then
-        return nil, ("peripheral %s is't %s"):format(tCS.peripheralName, self.peripheralName)
-    end
-    for slot, itemStack in pairs(tCS.slots) do
-        if self.slots[slot] == nil then
-            self.slots[slot] = itemStack
-        end
-    end
-    return self
 end
 
 return ContainerStack
