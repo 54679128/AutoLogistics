@@ -2,12 +2,13 @@
 
 local Object = require("lib.Object")
 local expect = require("cc.expect")
-local MaterialEntry = require("MaterialEntry")
+local MaterialEntry = require("lib.invManager.MaterialEntry")
 
 ---@class a546.InventoryManager:Object
----@field storages {[string]:a546.MaterialEntry}
+---@field storages table<string,a546.MaterialEntry>
 local InventoryManager = Object:extend()
 
+---@cast InventoryManager +fun():a546.InventoryManager
 function InventoryManager:new()
     self.storages = {}
 end
@@ -40,6 +41,12 @@ end
 ---@param peripheralName string
 function InventoryManager:remove(peripheralName)
     self.storages[peripheralName] = nil
+end
+
+--- 字面意思，返回内部字段
+---@return table<string, a546.MaterialEntry>
+function InventoryManager:getAll()
+    return self.storages
 end
 
 --- 更新表中某项

@@ -7,6 +7,7 @@ local expect = require("cc.expect")
 ---@field materials table<string,{materialType:"item"|"fluid"|string,materialCount:number}>
 local MaterialEntry = Object:extend()
 
+---@cast MaterialEntry +fun():a546.MaterialEntry
 function MaterialEntry:new()
     self.context = {}
 end

@@ -46,7 +46,7 @@ end
 
 --- 判断T是否是某种类
 ---@generic T:Object
----@param T T
+---@param T T|function
 ---@return boolean
 function Object:is(T)
   local mt = getmetatable(self)
