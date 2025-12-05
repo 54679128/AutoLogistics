@@ -8,3 +8,6 @@ local scriptSrcPath = debug.getinfo(1, "S").source:sub(2):match("(.*src[/\\])")
 insertPath(scriptSrcPath .. "?.lua")
 insertPath(scriptSrcPath .. "1/?.lua")
 insertPath(scriptSrcPath .. "2/?.lua")
+
+local log = require("lib.log")
+log.outfile = "log.txt"
