@@ -61,9 +61,14 @@ function ContainerStack:scan(peripheralName)
     end
     if scanObj.list then
         self.size = scanObj.size()
+        for slot, _ in pairs(scanObj.list()) do
+            self.slots[slot] = scanObj.getItemDetail(slot)
+        end
+        --[[
         for i = 1, self.size, 1 do
             self.slots[i] = scanObj.getItemDetail(i)
         end
+        ]]
     end
     self.updateTime = os.epoch("local")
     self.peripheralName = peripheralName
