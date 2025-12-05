@@ -62,14 +62,14 @@ function ContainerStack:scan(peripheralName)
         return nil, ("peripheral %s can't find"):format(peripheralName)
     end
     if scanObj.tanks then
-        for name, fluidInfo in pairs(scanObj.tanks()) do
+        for _, fluidInfo in pairs(scanObj.tanks()) do
             -- 由于流体和物品的格式不一样，这里要整理一下
             local itemFormat = {
                 count = fluidInfo.amount,
                 name = fluidInfo.name
             }
             ---@cast itemFormat +a546.ItemStack
-            self.slots[name] = itemFormat
+            self.slots[fluidInfo.name] = itemFormat
         end
     end
     if scanObj.list then
