@@ -1,7 +1,7 @@
 local Object = require("lib.Object")
 local log = require("lib.log")
 local util = require("lib.util")
-log.outfile("log.txt")
+log.outfile = "log.txt"
 
 ---@class a546.ContainerStack
 ---@field private slots table<number|string,a546.ItemStack> 键为槽位或流体名，值为物品栈。这个字段用于储存可被调用的物品或流体。
