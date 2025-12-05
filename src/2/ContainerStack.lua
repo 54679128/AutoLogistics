@@ -94,7 +94,7 @@ function ContainerStack:scanBySlot(peripheralName, slot)
 end
 
 --- 获取内部可用储存的一个副本
----@return table<number,a546.ItemStack>|{} # 键为槽位或流体名，值为物品栈
+---@return table<number|string,a546.ItemStack>|{} # 键为槽位或流体名，值为物品栈
 function ContainerStack:getAll()
     return util.copyTable(self.slots)
 end
