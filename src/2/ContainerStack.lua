@@ -100,7 +100,7 @@ function ContainerStack:getAll()
 end
 
 --- 获取内部不可用/锁定储存的一个副本
----@return table<number,a546.ItemStack>|{} # 键为槽位或流体名，值为物品栈
+---@return table<number|string,a546.ItemStack>|{} # 键为槽位或流体名，值为物品栈
 function ContainerStack:getLock()
     return util.copyTable(self.locks)
 end
