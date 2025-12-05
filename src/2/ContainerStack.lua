@@ -20,6 +20,19 @@ function ContainerStack:new()
     self.peripheralName = nil
 end
 
+--- 生成随机字符串
+---@param length number
+---@return string
+local function generateRandomString(length)
+    local chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()_+-="
+    local result = {}
+    for i = 1, length do
+        local rand = math.random(1, #chars)
+        table.insert(result, chars:sub(rand, rand))
+    end
+    return table.concat(result)
+end
+
 function ContainerStack:saveAsFile(outFile)
     local file = io.open(outFile, "w+")
     assert(file, ("can't open %s"):format(outFile))
@@ -107,7 +120,7 @@ end
 
 --- 从本容器中可用储存中移除指定槽位/名称，并转移至不可用/锁定储存。
 ---@param index number|number[]|string|string[]
----@return number id
+---@return string id
 function ContainerStack:lock(index)
     -- 参数处理
     if type(index) == "number" or type(index) == "string" then
@@ -122,7 +135,7 @@ function ContainerStack:lock(index)
             error(errMessage)
         end
     end
-    local targetLockId = os.epoch("local")
+    local targetLockId = generateRandomString(math.random(100))
     self.locks[targetLockId] = {}
     local tLock = self.locks[targetLockId]
     for _, i in pairs(index) do
@@ -135,7 +148,7 @@ end
 
 --- 从本容器中减少指定槽位/名称的物品/流体的数量，并转移至不可用/锁定储存。
 ---@param index {slotOrName:string|number,countOrAmount:number}[]
----@return number id
+---@return string id
 function ContainerStack:lockByCount(index)
     -- 检查是否能够执行要求的操作
     for i, v in pairs(index) do
@@ -152,7 +165,7 @@ function ContainerStack:lockByCount(index)
         end
     end
     -- 检查通过，开始处理转移逻辑
-    local targetLockId = os.epoch("local")
+    local targetLockId = generateRandomString(math.random(100))
     self.locks[targetLockId] = {}
     local tLock = self.locks[targetLockId]
     for _, v in pairs(index) do
@@ -169,12 +182,12 @@ function ContainerStack:lockByCount(index)
 end
 
 --- 使用 lock 系列函数给出的 id 解锁物品或流体
----@param id number
+---@param id string
 function ContainerStack:unLock(id)
     local processTable = self.locks[id]
     -- id不存在
     if not processTable then
-        local errMessage = ("Lock id:%d doen's exist"):format(id)
+        local errMessage = ("Lock id:%s doen's exist"):format(id)
         log.error(errMessage)
         error(errMessage)
         return
