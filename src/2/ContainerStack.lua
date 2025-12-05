@@ -32,11 +32,9 @@ function ContainerStack:reloadFromFile(reloadFile)
     file:seek("set")
     local cStr = textutils.unserialise(file:read("a"))
     ---@cast cStr a546.ContainerStack
-    self.locks = cStr.locks
-    self.peripheralName = cStr.peripheralName
-    self.size = cStr.size
-    self.slots = cStr.slots
-    self.updateTime = cStr.updateTime
+    for k, v in pairs(cStr) do
+        self[k] = v
+    end
 end
 
 --- 刚创建的 ContainerStack 需要使用这个方法初始化
