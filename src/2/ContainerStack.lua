@@ -8,6 +8,7 @@ log.outfile = "log.txt"
 
 ---@alias lockId string
 ---@alias slotOrName number|string
+---@alias resourceSlots table<slotOrName|string,a546.ItemStack>
 
 ---@class a546.ItemStack
 ---@field count number 对于流体，这代表 amount
@@ -19,8 +20,8 @@ log.outfile = "log.txt"
 ---@field nbt string|nil
 
 ---@class a546.ContainerStack
----@field private slots table<slotOrName|string,a546.ItemStack> 键为槽位或流体名，值为物品栈。这个字段用于储存可被调用的物品或流体。
----@field private locks table <lockId,table<slotOrName|string,a546.ItemStack>> # <Id:string|lockSlots:table<slotOrName:number|string,itemOrFluidStack:a546.ItemStack>>
+---@field private slots resourceSlots 键为槽位或流体名，值为物品栈。这个字段用于储存可被调用的物品或流体。
+---@field private locks table<lockId,resourceSlots> # <Id:string|lockSlots:table<slotOrName:number|string,itemOrFluidStack:a546.ItemStack>>
 ---@field size number|nil 如果该容器只能储存流体，则该字段为 nil
 ---@field updateTime number 本地时间戳
 ---@field peripheralName string
@@ -33,6 +34,15 @@ function ContainerStack:new()
     self.size = nil
     self.updateTime = nil
     self.peripheralName = nil
+end
+
+--- 检查该ContainerStack是否可以进行探测
+---@return boolean
+function ContainerStack:checkCanScan()
+    if next(self.locks) then
+        return false
+    end
+    return true
 end
 
 function ContainerStack:saveAsFile(outFile)
@@ -57,6 +67,11 @@ end
 ---@return nil|a546.ContainerStack
 ---@return string|nil errorMessage
 function ContainerStack:scan(peripheralName)
+    -- 判断是否可以执行检测
+    if not self:checkCanScan() then
+        log.warn(("Try to update ContainerStack %s which have some locking"):format(self.peripheralName))
+        return
+    end
     local scanObj = peripheral.wrap(peripheralName)
     -- 一些简单的检查，我期望以后会写一个自定义外设类来解决这些烦人的问题
     if not scanObj then
@@ -95,6 +110,11 @@ end
 ---@param slot number
 ---@return nil|a546.ContainerStack
 function ContainerStack:scanBySlot(peripheralName, slot)
+    -- 判断是否可以执行检测
+    if not self:checkCanScan() then
+        log.warn(("Try to update ContainerStack %s which have some locking"):format(self.peripheralName))
+        return
+    end
     local scanObj = peripheral.wrap(peripheralName)
     if not scanObj then
         log.warn(("peripheral %s can't find"):format(peripheralName))
@@ -131,7 +151,7 @@ function ContainerStack:lock(index)
             error(errMessage)
         end
     end
-    local targetLockId = util.generateRandomString(math.random(100))
+    local targetLockId = util.generateRandomString(math.random(50, 100))
     self.locks[targetLockId] = {}
     local tLock = self.locks[targetLockId]
     for _, i in pairs(index) do
@@ -161,7 +181,7 @@ function ContainerStack:lockByCount(index)
         end
     end
     -- 检查通过，开始处理转移逻辑
-    local targetLockId = util.generateRandomString(math.random(100))
+    local targetLockId = util.generateRandomString(math.random(50, 100))
     self.locks[targetLockId] = {}
     local tLock = self.locks[targetLockId]
     for _, v in pairs(index) do
@@ -182,21 +202,22 @@ end
 ---@return fun(peripheralName:string)|nil
 function ContainerStack:consumeLock(id)
     local result = {}
-    for key, v in pairs(self.locks) do
-        if key == id then
-            for slotOrName, itemStack in pairs(v) do
-                local temp = {
-                    slotOrName = slotOrName,
-                    countOrAmount = itemStack.count
-                }
-                table.insert(result, temp)
-            end
-        end
+    -- 判断是否有符合钥匙的锁
+    if not self.locks[id] then
+        log.error(("Key %s can't open peripheral %s's any lock"):format(id, self.peripheralName))
     end
-    if not next(result) then
-        log.error(("Try to consume doesn't exsit lock: %s"):format(id))
-        return
+    -- 从锁中提取相关信息
+    for slotOrName, itemStack in pairs(self.locks[id]) do
+        local temp = {
+            slotOrName = slotOrName,
+            countOrAmount = itemStack.count
+        }
+        table.insert(result, temp)
     end
+    -- 将锁定资源转移至新的锁下存放
+    local newRandomKey = util.generateRandomString(10)
+    self.locks[newRandomKey] = self.locks[id]
+    self.locks[id] = nil
     return function(targetPeripheralName)
         local output = invoker()
         for _, v in pairs(result) do
@@ -207,6 +228,8 @@ function ContainerStack:consumeLock(id)
             end
         end
         output:processAll()
+        -- 使用后删除锁定资源
+        self.locks[newRandomKey] = nil
     end
 end
 
