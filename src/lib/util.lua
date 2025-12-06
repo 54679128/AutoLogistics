@@ -35,4 +35,17 @@ function out.copyTable(tTable)
     return _copyTable(tTable, {})
 end
 
+--- 生成随机字符串
+---@param length number # 字符串长度
+---@return string
+function out.generateRandomString(length)
+    local chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()_+-="
+    local result = {}
+    for i = 1, length do
+        local rand = math.random(1, #chars)
+        table.insert(result, chars:sub(rand, rand))
+    end
+    return table.concat(result)
+end
+
 return out

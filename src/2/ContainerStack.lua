@@ -20,19 +20,6 @@ function ContainerStack:new()
     self.peripheralName = nil
 end
 
---- 生成随机字符串
----@param length number
----@return string
-local function generateRandomString(length)
-    local chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()_+-="
-    local result = {}
-    for i = 1, length do
-        local rand = math.random(1, #chars)
-        table.insert(result, chars:sub(rand, rand))
-    end
-    return table.concat(result)
-end
-
 function ContainerStack:saveAsFile(outFile)
     local file = io.open(outFile, "w+")
     assert(file, ("can't open %s"):format(outFile))
@@ -135,7 +122,7 @@ function ContainerStack:lock(index)
             error(errMessage)
         end
     end
-    local targetLockId = generateRandomString(math.random(100))
+    local targetLockId = util.generateRandomString(math.random(100))
     self.locks[targetLockId] = {}
     local tLock = self.locks[targetLockId]
     for _, i in pairs(index) do
@@ -165,7 +152,7 @@ function ContainerStack:lockByCount(index)
         end
     end
     -- 检查通过，开始处理转移逻辑
-    local targetLockId = generateRandomString(math.random(100))
+    local targetLockId = util.generateRandomString(math.random(100))
     self.locks[targetLockId] = {}
     local tLock = self.locks[targetLockId]
     for _, v in pairs(index) do
