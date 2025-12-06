@@ -1,6 +1,9 @@
 local Object = require("lib.Object")
 local log = require("lib.log")
 local util = require("lib.util")
+local itemCommand = require("commands.TransferSlotToInventory")
+local fluidCommand = require("commands.TransferFluid")
+local invoker = require("CommandInvoker")
 log.outfile = "log.txt"
 
 ---@alias lockId string
@@ -174,8 +177,41 @@ function ContainerStack:lockByCount(index)
     return targetLockId
 end
 
+--- 消耗或提取锁定的物品
+---@param id lockId
+---@return fun(peripheralName:string)|nil
+function ContainerStack:consumeLock(id)
+    local result = {}
+    for key, v in pairs(self.locks) do
+        if key == id then
+            for slotOrName, itemStack in pairs(v) do
+                local temp = {
+                    slotOrName = slotOrName,
+                    countOrAmount = itemStack.count
+                }
+                table.insert(result, temp)
+            end
+        end
+    end
+    if not next(result) then
+        log.error(("Try to consume doesn't exsit lock: %s"):format(id))
+        return
+    end
+    return function(targetPeripheralName)
+        local output = invoker()
+        for _, v in pairs(result) do
+            if type(v.slotOrName) == "string" then
+                output:addCommand(fluidCommand(self.peripheralName, targetPeripheralName, v.countOrAmount, v.slotOrName))
+            else
+                output:addCommand(itemCommand(self.peripheralName, targetPeripheralName, v.slotOrName, v.countOrAmount))
+            end
+        end
+        output:processAll()
+    end
+end
+
 --- 使用 lock 系列函数给出的 id 解锁物品或流体
----@param id string
+---@param id lockId
 function ContainerStack:unLock(id)
     local processTable = self.locks[id]
     -- id不存在
