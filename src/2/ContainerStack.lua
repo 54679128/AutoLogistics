@@ -3,6 +3,9 @@ local log = require("lib.log")
 local util = require("lib.util")
 log.outfile = "log.txt"
 
+---@alias lockId string
+---@alias slotOrName number|string
+
 ---@class a546.ItemStack
 ---@field count number 对于流体，这代表 amount
 ---@field displayName string|nil
@@ -13,8 +16,8 @@ log.outfile = "log.txt"
 ---@field nbt string|nil
 
 ---@class a546.ContainerStack
----@field private slots table<number|string,a546.ItemStack> 键为槽位或流体名，值为物品栈。这个字段用于储存可被调用的物品或流体。
----@field private locks table <string,table<number|string,a546.ItemStack>> # <Id:string|lockSlots:table<slotOrName:number|string,itemOrFluidStack:a546.ItemStack>>
+---@field private slots table<slotOrName|string,a546.ItemStack> 键为槽位或流体名，值为物品栈。这个字段用于储存可被调用的物品或流体。
+---@field private locks table <lockId,table<slotOrName|string,a546.ItemStack>> # <Id:string|lockSlots:table<slotOrName:number|string,itemOrFluidStack:a546.ItemStack>>
 ---@field size number|nil 如果该容器只能储存流体，则该字段为 nil
 ---@field updateTime number 本地时间戳
 ---@field peripheralName string
