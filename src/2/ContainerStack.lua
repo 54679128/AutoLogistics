@@ -3,6 +3,15 @@ local log = require("lib.log")
 local util = require("lib.util")
 log.outfile = "log.txt"
 
+---@class a546.ItemStack
+---@field count number 对于流体，这代表 amount
+---@field displayName string|nil
+---@field itemGroups {displayName:string,id:string}[]|{}
+---@field maxCount number|nil
+---@field name string
+---@field tags table<string,boolean>|nil
+---@field nbt string|nil
+
 ---@class a546.ContainerStack
 ---@field private slots table<number|string,a546.ItemStack> 键为槽位或流体名，值为物品栈。这个字段用于储存可被调用的物品或流体。
 ---@field private locks table <number,table<number|string,a546.ItemStack>> # <Id:number|lockSlots:table<slotOrName:number|string,itemOrFluidStack:a546.ItemStack>>
