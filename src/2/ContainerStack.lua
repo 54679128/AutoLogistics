@@ -14,7 +14,7 @@ log.outfile = "log.txt"
 
 ---@class a546.ContainerStack
 ---@field private slots table<number|string,a546.ItemStack> 键为槽位或流体名，值为物品栈。这个字段用于储存可被调用的物品或流体。
----@field private locks table <number,table<number|string,a546.ItemStack>> # <Id:number|lockSlots:table<slotOrName:number|string,itemOrFluidStack:a546.ItemStack>>
+---@field private locks table <string,table<number|string,a546.ItemStack>> # <Id:string|lockSlots:table<slotOrName:number|string,itemOrFluidStack:a546.ItemStack>>
 ---@field size number|nil 如果该容器只能储存流体，则该字段为 nil
 ---@field updateTime number 本地时间戳
 ---@field peripheralName string
