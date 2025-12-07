@@ -15,6 +15,7 @@ log.outfile = "log.txt"
 ---@class a546.Resource
 ---@field name string 资源名称
 ---@field quantity number 资源数量
+---@field resourceType "item"|"fluid"|string
 ---@field nbt string|nil 这个 NBT 数据没有包含任何有用的信息，但允许你区分相同的物品
 ---@field detail nil|fun():a546.ItemStack
 
