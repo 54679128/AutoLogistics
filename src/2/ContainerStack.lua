@@ -17,7 +17,7 @@ log.outfile = "log.txt"
 ---@field quantity number 资源数量
 ---@field resourceType "item"|"fluid"|string
 ---@field nbt string|nil 这个 NBT 数据没有包含任何有用的信息，但允许你区分相同的物品
----@field detail nil|fun():a546.ItemStack
+---@field detail nil|(fun():a546.ItemStack|nil)
 
 ---@alias SlotOrName string|number # 数字槽位、字符串代表流体名
 
