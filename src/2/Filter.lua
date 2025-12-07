@@ -1,14 +1,5 @@
 local O = require("lib.Object")
 
----@class a546.ItemStack
----@field count number 对于流体，这代表 amount
----@field displayName string|nil
----@field itemGroups {displayName:string,id:string}[]|{}
----@field maxCount number|nil
----@field name string
----@field tags table<string,boolean>|nil
----@field nbt string|nil
-
 ---@class a546.Filter
 ---@field predicate fun(ItemStack:a546.ItemStack):boolean
 local Filter = O:extend()
