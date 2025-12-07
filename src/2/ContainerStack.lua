@@ -201,6 +201,7 @@ end
 ---@param id lockId
 ---@return fun(peripheralName:string)|nil
 function ContainerStack:consumeLock(id)
+    ---@type table<number,{slotOrName:slotOrName,countOrAmount:number}>
     local result = {}
     -- 判断是否有符合钥匙的锁
     if not self.locks[id] then
@@ -219,12 +220,80 @@ function ContainerStack:consumeLock(id)
     self.locks[newRandomKey] = self.locks[id]
     self.locks[id] = nil
     return function(targetPeripheralName)
+        -- 首先判断源容器是否有足够的资源
+        local errMessage = ("Peripheral %s doesn't exsit"):format(self.peripheralName)
+        local container = peripheral.wrap(self.peripheralName)
+        if not container then
+            log.error(errMessage)
+            error(errMessage)
+        end
+        -- 如果是物品容器
+        if container.list then
+            local itemList = container.list()
+            for slotOrName, itemStack in pairs(self.locks[newRandomKey]) do
+                -- 原外设是空的
+                -- 这个判断可以放在for外面，但放在里面比较整齐
+                if not itemList then
+                    errMessage = ("Perhiperal %s is empty of item"):format(self.peripheralName)
+                    log.error(errMessage)
+                    -- 这里可能还需要一些额外的处理
+                    error(errMessage)
+                end
+                -- 物品存在但少于需求的数量
+                if itemList[slotOrName] and itemList[slotOrName].count < itemStack.count then
+                    errMessage = ("Peripheral %s doesn't have enough item %s:\nNeed: name:%s, count:%s\nHave: name:%s, count:%s")
+                        :format(self.peripheralName, itemStack.name, itemStack.name, itemStack.count,
+                            itemList[slotOrName].name, itemList[slotOrName].count)
+                    log.error(errMessage)
+                    error(errMessage)
+                end
+                -- 物品不存在
+                if not itemList[slotOrName] then
+                    errMessage = ("Peripheral %s doesn't have item %s"):format(self.peripheralName, itemStack.name)
+                    log.error(errMessage)
+                    error(errMessage)
+                end
+            end
+        end
+        -- 如果是流体容器
+        if container.tanks then
+            local fluidList = container.tanks()
+            local resourceSlots = self.locks[newRandomKey]
+            for _, fluidStack in pairs(fluidList) do
+                -- 流体容器是空的
+                if not fluidList then
+                    errMessage = ("Perhiperal %s is empty of fluid"):format(self.peripheralName)
+                    log.error(errMessage)
+                    -- 这里可能还需要一些额外的处理
+                    error(errMessage)
+                end
+                -- 需要的流体不存在
+                if not resourceSlots[fluidStack.name] then
+                    errMessage = ("Peripheral %s doesn't have fluid %s"):format(self.peripheralName, fluidStack.name)
+                    log.error(errMessage)
+                    error(errMessage)
+                end
+                -- 需要的流体存在但数量不足
+                if resourceSlots[fluidStack.name].count > fluidStack.amount then
+                    errMessage = ("Peripheral %s doesn't have enough fluid %s:\nNeed: name:%s, amount:%s\nHave: name:%s, amount:%s")
+                        :format(self.peripheralName, fluidStack.name, fluidStack.name, fluidStack.amount,
+                            resourceSlots[fluidStack.name].name, resourceSlots[fluidStack.name].count)
+                    log.error(errMessage)
+                    error(errMessage)
+                end
+            end
+        end
+        -- 我本来想接着判断目标容器是否有足够的空间（这在流体上有些问题，cc的通用流体外设没有提供检查流体容器的方法），但我想到涉及到某些mod时，没有任何办法检查它们是否可以通过接收所要传输的物品。你只能尝试传输，然后检查传输是否失败。
+
         local output = invoker()
         for _, v in pairs(result) do
+            -- 流体和物品用不同的命令
             if type(v.slotOrName) == "string" then
-                output:addCommand(fluidCommand(self.peripheralName, targetPeripheralName, v.countOrAmount, v.slotOrName))
+                output:addCommand(fluidCommand(self.peripheralName, targetPeripheralName, v.countOrAmount,
+                    v.slotOrName --[[@as string]]))
             else
-                output:addCommand(itemCommand(self.peripheralName, targetPeripheralName, v.slotOrName, v.countOrAmount))
+                output:addCommand(itemCommand(self.peripheralName, targetPeripheralName, v.slotOrName --[[@as number]],
+                    v.countOrAmount))
             end
         end
         output:processAll()
