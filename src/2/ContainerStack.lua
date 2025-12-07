@@ -12,6 +12,16 @@ log.outfile = "log.txt"
 ---@field tags table<string,boolean>|nil
 ---@field nbt string|nil
 
+---@class a546.Resource
+---@field name string 资源名称
+---@field quantity number 资源数量
+---@field nbt string|nil 这个 NBT 数据没有包含任何有用的信息，但允许你区分相同的物品
+---@field detail nil|fun():a546.ItemStack
+
+---@alias SlotOrName string|number # 数字槽位、字符串代表流体名
+
+---@alias LockReceipt string # 票据
+
 ---@class a546.ContainerStack
 ---@field private slots table<number|string,a546.ItemStack> 键为槽位或流体名，值为物品栈。这个字段用于储存可被调用的物品或流体。
 ---@field private locks table <number,table<number|string,a546.ItemStack>> # <Id:number|lockSlots:table<slotOrName:number|string,itemOrFluidStack:a546.ItemStack>>
