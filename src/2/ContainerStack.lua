@@ -12,9 +12,20 @@ log.outfile = "log.txt"
 ---@field tags table<string,boolean>|nil
 ---@field nbt string|nil
 
+---@class a546.Resource
+---@field name string 资源名称
+---@field quantity number 资源数量
+---@field resourceType "item"|"fluid"|string
+---@field nbt string|nil 这个 NBT 数据没有包含任何有用的信息，但允许你区分相同的物品
+---@field detail nil|(fun():a546.ItemStack|nil)
+
+---@alias SlotOrName string|number # 数字槽位、字符串代表流体名
+
+---@alias LockReceipt string # 票据
+
 ---@class a546.ContainerStack
----@field private slots table<number|string,a546.ItemStack> 键为槽位或流体名，值为物品栈。这个字段用于储存可被调用的物品或流体。
----@field private locks table <number,table<number|string,a546.ItemStack>> # <Id:number|lockSlots:table<slotOrName:number|string,itemOrFluidStack:a546.ItemStack>>
+---@field private slots table<SlotOrName,a546.Resource> 键为槽位或流体名，值为物品栈。这个字段用于储存可被调用的物品或流体。
+---@field private locks table <LockReceipt,table<SlotOrName,a546.Resource>> # <Id:number|lockSlots:table<slotOrName:number|string,itemOrFluidStack:a546.ItemStack>>
 ---@field size number|nil 如果该容器只能储存流体，则该字段为 nil
 ---@field updateTime number 本地时间戳
 ---@field peripheralName string
@@ -32,6 +43,10 @@ end
 function ContainerStack:saveAsFile(outFile)
     local file = io.open(outFile, "w+")
     assert(file, ("can't open %s"):format(outFile))
+    -- 函数无法被序列化，所以预先删除
+    for _, resource in pairs(self.slots) do
+        resource.detail = nil
+    end
     file:write(textutils.serialise(self, { allow_repetitions = true }))
 end
 
@@ -43,6 +58,21 @@ function ContainerStack:reloadFromFile(reloadFile)
     ---@cast cStr a546.ContainerStack
     for k, v in pairs(cStr) do
         self[k] = v
+    end
+    -- 回复在保存为文件前被删除的 detail 函数
+    for slotOrName, resource in pairs(self.slots) do
+        if type(slotOrName) == "string" then
+            goto continue
+        end
+        resource.detail = function()
+            local tempPer = peripheral.wrap(self.peripheralName)
+            if not tempPer then
+                log.warn(("peripheral %s can't find"):format(self.peripheralName))
+                return nil
+            end
+            return tempPer.getItemDetail(slotOrName)
+        end
+        ::continue::
     end
 end
 
@@ -60,25 +90,37 @@ function ContainerStack:scan(peripheralName)
     if scanObj.tanks then
         for _, fluidInfo in pairs(scanObj.tanks()) do
             -- 由于流体和物品的格式不一样，这里要整理一下
-            local itemFormat = {
-                count = fluidInfo.amount,
-                name = fluidInfo.name
+            ---@type a546.Resource
+            local resourceFormat = {
+                name = fluidInfo.name,
+                quantity = fluidInfo.amount,
+                resourceType = "fluid"
             }
-            ---@cast itemFormat +a546.ItemStack
-            self.slots[fluidInfo.name] = itemFormat
+            self.slots[fluidInfo.name] = resourceFormat
         end
     end
     if scanObj.list then
-        self.size = scanObj.size()
-        for slot, _ in pairs(scanObj.list()) do
-            self.slots[slot] = scanObj.getItemDetail(slot)
+        local itemList = scanObj.list()
+        for slot, itemInfo in pairs(itemList) do
+            ---@type a546.Resource
+            local resourceFormat = {
+                name = itemInfo.name,
+                quantity = itemInfo.count,
+                resourceType = "item",
+                nbt = itemInfo.nbt,
+                detail = function()
+                    local tempPer = peripheral.wrap(peripheralName)
+                    if not tempPer then
+                        log.warn(("peripheral %s can't find"):format(peripheralName))
+                        return nil
+                    end
+                    return tempPer.getItemDetail(slot)
+                end
+            }
+            self.slots[slot] = resourceFormat
         end
-        --[[
-        for i = 1, self.size, 1 do
-            self.slots[i] = scanObj.getItemDetail(i)
-        end
-        ]]
     end
+    self.size = scanObj.size()
     self.updateTime = os.epoch("local")
     self.peripheralName = peripheralName
     return self
@@ -89,28 +131,61 @@ end
 ---@param slot number
 ---@return nil|a546.ContainerStack
 function ContainerStack:scanBySlot(peripheralName, slot)
+    -- 检查外设上是否存在
     local scanObj = peripheral.wrap(peripheralName)
     if not scanObj then
         log.warn(("peripheral %s can't find"):format(peripheralName))
         return nil
     end
-
+    -- 检查该槽位是否存在
+    if slot > scanObj.size() then
+        log.warn(("peripheral %s doesn't have this slot %d"):format(peripheralName, slot))
+        return nil
+    end
+    local itemList = scanObj.list()
+    -- 检查该槽位是否存在物品
+    if not itemList[slot] then
+        log.warn(("peripheral %s doesn't have item in slot %d"):format(peripheralName, slot))
+        return nil
+    end
+    -- 构造 Resource
+    ---@type a546.Resource
+    local resourceFormat = {
+        name = itemList[slot].name,
+        quantity = itemList[slot].count,
+        resourceType = "item",
+        nbt = itemList[slot].nbt,
+        detail = function()
+            local tempPer = peripheral.wrap(peripheralName)
+            if not tempPer then
+                log.warn(("peripheral %s can't find"):format(peripheralName))
+                return nil
+            end
+            return tempPer.getItemDetail(slot)
+        end
+    }
     self.size = scanObj.size()
-    self.slots[slot] = scanObj.getItemDetail(slot)
+    self.slots[slot] = resourceFormat
     self.updateTime = os.epoch("local")
     self.peripheralName = peripheralName
     return self
 end
 
 --- 获取内部可用储存的一个副本
----@return table<number|string,a546.ItemStack>|{} # 键为槽位或流体名，值为物品栈
+---@return table<SlotOrName,a546.Resource>|{} # 键为槽位或流体名，值为物品栈
 function ContainerStack:getContext()
     return util.copyTable(self.slots)
 end
 
+--- 获取内部锁定表的一个副本。这个函数之应该用于debug。
+---@return table<string, table<string|number, a546.Resource>>
+function ContainerStack:getLock()
+    return util.copyTable(self.locks)
+end
+
 --- 从本容器中可用储存中移除指定槽位/名称，并转移至不可用/锁定储存。
----@param index number|number[]|string|string[]
----@return string id
+---@param index number|number[]|string|string[]|table<any,SlotOrName>
+---@return LockReceipt
 function ContainerStack:lock(index)
     -- 参数处理
     if type(index) == "number" or type(index) == "string" then
@@ -125,7 +200,7 @@ function ContainerStack:lock(index)
             error(errMessage)
         end
     end
-    local targetLockId = util.generateRandomString(math.random(100))
+    local targetLockId = util.generateRandomString(math.random(50, 60))
     self.locks[targetLockId] = {}
     local tLock = self.locks[targetLockId]
     for _, i in pairs(index) do
@@ -138,61 +213,67 @@ end
 
 --- 从本容器中减少指定槽位/名称的物品/流体的数量，并转移至不可用/锁定储存。
 ---@param index {slotOrName:string|number,countOrAmount:number}[]
----@return string id
+---@return LockReceipt
 function ContainerStack:lockByCount(index)
     -- 检查是否能够执行要求的操作
     for i, v in pairs(index) do
+        -- 索引中提到的槽位/流体名在可用库存中不存在物品/流体
         if not self.slots[v.slotOrName] then
             local errMessage = ("Index ask item/fluid: %s does't exist"):format(v.slotOrName)
             log.error(errMessage)
             error(errMessage)
         end
-        if self.slots[v.slotOrName].count < v.countOrAmount then
-            log.error(("Index %d not enough quantity. Inventory: %d, Ask: %d"):format(i, self.slots[v.slotOrName].count,
+        -- 索引中要求的数量大于可用库存中拥有的数量
+        if self.slots[v.slotOrName].quantity < v.countOrAmount then
+            log.error(("Not have enough resource for index %d. Inventory: %d, Ask: %d"):format(i,
+                self.slots[v.slotOrName].quantity,
                 v.countOrAmount))
-            error(("Index %d not enough quantity. Inventory: %d, Ask: %d"):format(i, self.slots[v.slotOrName].count,
+            error(("Not have enough resource for index %d. Inventory: %d, Ask: %d"):format(i,
+                self.slots[v.slotOrName].quantity,
                 v.countOrAmount))
         end
     end
     -- 检查通过，开始处理转移逻辑
-    local targetLockId = util.generateRandomString(math.random(100))
-    self.locks[targetLockId] = {}
-    local tLock = self.locks[targetLockId]
+    local lockReceipt = util.generateRandomString(math.random(50, 60))
+    self.locks[lockReceipt] = {}
+    local tLock = self.locks[lockReceipt]
     for _, v in pairs(index) do
-        local sourceStack = self.slots[v.slotOrName]
-        tLock[v.slotOrName] = util.copyTable(sourceStack)
-        sourceStack.count = sourceStack.count - v.countOrAmount
-        tLock[v.slotOrName].count = v.countOrAmount
+        local sourceResource = self.slots[v.slotOrName]
+        -- copyTable 没法完整复制 detail 函数，所以这里可能会出问题
+        tLock[v.slotOrName] = util.copyTable(sourceResource)
+        sourceResource.quantity = sourceResource.quantity - v.countOrAmount
+        tLock[v.slotOrName].quantity = v.countOrAmount
         -- 如果 sourceStack.count 为零，可以直接删掉
-        if sourceStack.count == 0 then
+        if sourceResource.quantity == 0 then
             self.slots[v.slotOrName] = nil
         end
     end
-    return targetLockId
+    return lockReceipt
 end
 
---- 使用 lock 系列函数给出的 id 解锁物品或流体
----@param id string
-function ContainerStack:unLock(id)
-    local processTable = self.locks[id]
-    -- id不存在
+--- 使用 lock 系列函数给出的 lockReceipt 解锁物品或流体
+---@param lockReceipt string
+function ContainerStack:unLock(lockReceipt)
+    local processTable = self.locks[lockReceipt]
+    -- 票据不存在
     if not processTable then
-        local errMessage = ("Lock id:%s doen's exist"):format(id)
-        log.error(errMessage)
-        error(errMessage)
+        local errMessage = ("Try to unlock unexsit lock receipt %s"):format(lockReceipt)
+        log.warn(errMessage)
+        -- error(errMessage)
         return
     end
+    -- 合并操作
     for i, v in pairs(processTable) do
         if not self.slots[i] then
             self.slots[i] = v
             --processTable[i] = nil 最后会丢弃整个表，在这里设置毫无意义
             goto continue
         end
-        self.slots[i].count = self.slots[i].count + v.count
+        self.slots[i].quantity = self.slots[i].quantity + v.quantity
         ::continue::
     end
     -- 处理完毕，丢弃
-    self.locks[id] = nil
+    self.locks[lockReceipt] = nil
 end
 
 return ContainerStack
