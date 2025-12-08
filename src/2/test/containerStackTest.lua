@@ -8,7 +8,7 @@ local function pressEnter()
     read()
 end
 
--- Test 1: Basic item container scanning
+-- 测试一：物品容器检测
 print("=== Test 1: Item Container Scan ===")
 local itemStack = ContainerStack()
 local success, err = itemStack:scan("left")
@@ -30,7 +30,7 @@ else
     print("Item container scan failed:", err)
 end
 pressEnter()
--- Test 2: Fluid container scanning
+-- 测试二：流体容器检测
 print("\n=== Test 2: Fluid Container Scan ===")
 local fluidStack = ContainerStack()
 local success, err = fluidStack:scan("left")
@@ -48,22 +48,22 @@ else
     print("Fluid container scan failed:", err)
 end
 pressEnter()
--- Test 3: Lock functionality test
+-- 测试三：锁定功能
 print("\n=== Test 3: Lock Functionality Test ===")
 local testStack = ContainerStack()
 testStack:scan("left")
 
--- Lock single slot
+-- 锁定单个槽位
 print("Locking slot 1")
 local lockId1 = testStack:lock(1)
 print("Lock ID:", lockId1)
 
--- Lock multiple slots
+--锁定多个槽位
 print("Locking slots 2,3,4")
 local lockId2 = testStack:lock({ 2, 3, 4 })
 print("Lock ID:", lockId2)
 
--- Check lock status
+-- 检查锁定状态
 local lockItems = testStack:getLock()
 local lockCount = 0
 for _, _ in pairs(lockItems) do
@@ -78,7 +78,7 @@ for id, items in pairs(lockItems) do
     print(string.format("  Lock ID %s contains %d items", id, iLockCount))
 end
 
--- Unlock test
+-- 解锁测试
 print("Unlocking lock ID:", lockId1)
 testStack:unLock(lockId1)
 print("Lock status after unlock:")
@@ -87,15 +87,15 @@ for id, _ in pairs(remainingLocks) do
     print("  Remaining lock ID:", id)
 end
 pressEnter()
--- Test 4: Lock by count
+-- 测试四：根据数量锁定
 print("\n=== Test 4: Lock by Count ===")
 local countStack = ContainerStack()
 countStack:scan("left")
 
--- Assuming slot 1 has 64 cobblestone
+-- 假设槽位1、4各有32、16个物品
 local lockRequest = {
-    { slotOrName = 1, countOrAmount = 32 }, -- Lock 32 items
-    { slotOrName = 2, countOrAmount = 16 }  -- Lock 16 items
+    { slotOrName = 1, countOrAmount = 32 }, -- 锁定 32 个物品
+    { slotOrName = 2, countOrAmount = 16 }  -- 锁定 16 个物品
 }
 
 print("Lock by count request:")
@@ -106,7 +106,7 @@ end
 local countLockId = countStack:lockByCount(lockRequest)
 print("Lock ID:", countLockId)
 
--- Verify remaining counts
+-- 验证剩余数量
 local remaining = countStack:getContext()
 for slot, item in pairs(remaining) do
     if type(slot) == "string" then
@@ -118,7 +118,7 @@ for slot, item in pairs(remaining) do
     ::continue::
 end
 pressEnter()
--- Test 5: File save and restore
+-- 测试五：保存为文件和重载
 print("\n=== Test 5: File Save and Restore ===")
 local saveStack = ContainerStack()
 saveStack:scan("left")
@@ -135,14 +135,14 @@ print("Restored container name:", restoreStack.peripheralName)
 print("Restored container size:", restoreStack.size)
 print("Restored update time:", restoreStack.updateTime)
 
--- Clean up test file
-
+-- 清理测试文件
+fs.delete(saveFile)
 print("Test file cleanup complete")
 pressEnter()
--- Test 6: Error handling test
+-- 测试六：错误处理
 print("\n=== Test 6: Error Handling Test ===")
 
--- Test locking non-existent slot
+-- 测试锁定不存在的槽位
 local errorStack = ContainerStack()
 errorStack:scan("left")
 
@@ -154,7 +154,7 @@ if not status then
     print("Expected error:", errMsg)
 end
 
--- Test unlocking non-existent ID
+-- 尝试使用不存在的票据解锁
 print("Attempting to unlock non-existent lock ID...")
 local status, errMsg = pcall(function()
     errorStack:unLock("999999")
