@@ -157,6 +157,12 @@ function ContainerStack:getContext()
     return util.copyTable(self.slots)
 end
 
+--- 获取内部锁定表的一个副本。这个函数之应该用于debug。
+---@return table<string, table<string|number, a546.Resource>>
+function ContainerStack:getLock()
+    return util.copyTable(self.locks)
+end
+
 --- 从本容器中可用储存中移除指定槽位/名称，并转移至不可用/锁定储存。
 ---@param index number|number[]|string|string[]|table<any,SlotOrName>
 ---@return LockReceipt
