@@ -75,7 +75,7 @@ function ContainerStack:scan(peripheralName)
             local resourceFormat = {
                 name = fluidInfo.name,
                 quantity = fluidInfo.amount,
-                resourceType = "item"
+                resourceType = "fluid"
             }
             self.slots[fluidInfo.name] = resourceFormat
         end
