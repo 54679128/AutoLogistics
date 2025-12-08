@@ -101,6 +101,7 @@ function ContainerStack:scan(peripheralName)
             self.slots[slot] = resourceFormat
         end
     end
+    self.size = scanObj.size()
     self.updateTime = os.epoch("local")
     self.peripheralName = peripheralName
     return self
