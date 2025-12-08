@@ -111,6 +111,7 @@ end
 ---@param slot number
 ---@return nil|a546.ContainerStack
 function ContainerStack:scanBySlot(peripheralName, slot)
+    -- 检查外设上是否存在
     local scanObj = peripheral.wrap(peripheralName)
     if not scanObj then
         log.warn(("peripheral %s can't find"):format(peripheralName))
@@ -190,6 +191,7 @@ end
 function ContainerStack:lockByCount(index)
     -- 检查是否能够执行要求的操作
     for i, v in pairs(index) do
+        -- 索引中提到的槽位/流体名在可用库存中不存在物品/流体
         if not self.slots[v.slotOrName] then
             local errMessage = ("Index ask item/fluid: %s does't exist"):format(v.slotOrName)
             log.error(errMessage)
@@ -234,6 +236,7 @@ function ContainerStack:unLock(lockReceipt)
         -- error(errMessage)
         return
     end
+    -- 合并操作
     for i, v in pairs(processTable) do
         if not self.slots[i] then
             self.slots[i] = v
