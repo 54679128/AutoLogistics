@@ -43,6 +43,10 @@ end
 function ContainerStack:saveAsFile(outFile)
     local file = io.open(outFile, "w+")
     assert(file, ("can't open %s"):format(outFile))
+    -- 函数无法被序列化，所以预先删除
+    for _, resource in pairs(self.slots) do
+        resource.detail = nil
+    end
     file:write(textutils.serialise(self, { allow_repetitions = true }))
 end
 
@@ -54,6 +58,21 @@ function ContainerStack:reloadFromFile(reloadFile)
     ---@cast cStr a546.ContainerStack
     for k, v in pairs(cStr) do
         self[k] = v
+    end
+    -- 回复在保存为文件前被删除的 detail 函数
+    for slotOrName, resource in pairs(self.slots) do
+        if type(slotOrName) == "string" then
+            goto continue
+        end
+        resource.detail = function()
+            local tempPer = peripheral.wrap(self.peripheralName)
+            if not tempPer then
+                log.warn(("peripheral %s can't find"):format(self.peripheralName))
+                return nil
+            end
+            return tempPer.getItemDetail(slotOrName)
+        end
+        ::continue::
     end
 end
 
