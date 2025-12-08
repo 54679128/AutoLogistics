@@ -162,6 +162,45 @@ end)
 if not status then
     print("Expected error:", errMsg)
 end
+-- 测试六：流体容器锁定
+print("\n=== Test 7: Fluid Lock ===")
+local fluidStack = ContainerStack()
+local success, err = fluidStack:scan("left")
+
+-- 锁定一种流体
+local targetFluidName
+for slotOrName, _ in pairs(fluidStack:getContext()) do
+    if type(slotOrName) == "string" then
+        targetFluidName = slotOrName
+        break
+    end
+end
+local lockReceipt = fluidStack:lock(targetFluidName)
+print(("Lock receipt: %s"):format(lockReceipt))
+
+-- 检查锁定状态
+local lockFluid = fluidStack:getLock()
+local lockCount = 0
+for _, _ in pairs(lockFluid) do
+    lockCount = lockCount + 1
+end
+print("Number of locked fluid:", lockCount)
+for id, fluid in pairs(lockFluid) do
+    local iLockCount = 0
+    for _, _ in pairs(fluid) do
+        iLockCount = iLockCount + 1
+    end
+    print(string.format("  Lock ID %s contains %d fluid", id, iLockCount))
+end
+
+-- 解锁测试
+print("Unlocking lock ID:", lockReceipt)
+fluidStack:unLock(lockReceipt)
+print("Lock status after unlock:")
+local remainingLocks = fluidStack:getLock()
+for id, _ in pairs(remainingLocks) do
+    print("  Remaining lock ID:", id)
+end
 
 print("\n=== All tests completed ===")
 print("Check log.txt for detailed log information")
