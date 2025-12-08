@@ -174,7 +174,7 @@ function ContainerStack:lock(index)
             error(errMessage)
         end
     end
-    local targetLockId = util.generateRandomString(math.random(100))
+    local targetLockId = util.generateRandomString(math.random(50,60))
     self.locks[targetLockId] = {}
     local tLock = self.locks[targetLockId]
     for _, i in pairs(index) do
@@ -208,7 +208,7 @@ function ContainerStack:lockByCount(index)
         end
     end
     -- 检查通过，开始处理转移逻辑
-    local lockReceipt = util.generateRandomString(math.random(100))
+    local lockReceipt = util.generateRandomString(math.random(50,60))
     self.locks[lockReceipt] = {}
     local tLock = self.locks[lockReceipt]
     for _, v in pairs(index) do
