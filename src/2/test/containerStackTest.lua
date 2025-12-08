@@ -17,13 +17,13 @@ if success then
     print("Container size:", itemStack.size)
     print("Update time:", itemStack.updateTime)
 
-    local allItems = itemStack:getAll()
+    local allItems = itemStack:getContext()
     print("Number of items:", #allItems)
     for slot, item in pairs(allItems) do
         if type(slot) == "string" then
             goto continue
         end
-        print(string.format("  Slot %s: %s x%d", slot, item.name, item.count))
+        print(string.format("  Slot %s: %s x%d", slot, item.name, item.quantity))
         ::continue::
     end
 else
@@ -36,12 +36,12 @@ local fluidStack = ContainerStack()
 local success, err = fluidStack:scan("left")
 if success then
     print("Fluid container scan successful")
-    local allFluids = fluidStack:getAll()
+    local allFluids = fluidStack:getContext()
     for name, fluid in pairs(allFluids) do
         if type(name) == "number" then
             goto continue
         end
-        print(string.format("  Fluid %s: %s mB", fluid.name, fluid.count))
+        print(string.format("  Fluid %s: %s mB", fluid.name, fluid.quantity))
         ::continue::
     end
 else
@@ -107,13 +107,13 @@ local countLockId = countStack:lockByCount(lockRequest)
 print("Lock ID:", countLockId)
 
 -- Verify remaining counts
-local remaining = countStack:getAll()
+local remaining = countStack:getContext()
 for slot, item in pairs(remaining) do
     if type(slot) == "string" then
         goto continue
     end
     if item then
-        print(string.format("  Slot %d remaining: %s x%d", slot, item.name, item.count))
+        print(string.format("  Slot %d remaining: %s x%d", slot, item.name, item.quantity))
     end
     ::continue::
 end
