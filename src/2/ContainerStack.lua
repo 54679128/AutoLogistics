@@ -159,7 +159,7 @@ end
 
 --- 从本容器中可用储存中移除指定槽位/名称，并转移至不可用/锁定储存。
 ---@param index number|number[]|string|string[]|table<any,SlotOrName>
----@return string id
+---@return LockReceipt
 function ContainerStack:lock(index)
     -- 参数处理
     if type(index) == "number" or type(index) == "string" then
@@ -174,7 +174,7 @@ function ContainerStack:lock(index)
             error(errMessage)
         end
     end
-    local targetLockId = util.generateRandomString(math.random(50,60))
+    local targetLockId = util.generateRandomString(math.random(50, 60))
     self.locks[targetLockId] = {}
     local tLock = self.locks[targetLockId]
     for _, i in pairs(index) do
@@ -187,7 +187,7 @@ end
 
 --- 从本容器中减少指定槽位/名称的物品/流体的数量，并转移至不可用/锁定储存。
 ---@param index {slotOrName:string|number,countOrAmount:number}[]
----@return string id
+---@return LockReceipt
 function ContainerStack:lockByCount(index)
     -- 检查是否能够执行要求的操作
     for i, v in pairs(index) do
@@ -208,7 +208,7 @@ function ContainerStack:lockByCount(index)
         end
     end
     -- 检查通过，开始处理转移逻辑
-    local lockReceipt = util.generateRandomString(math.random(50,60))
+    local lockReceipt = util.generateRandomString(math.random(50, 60))
     self.locks[lockReceipt] = {}
     local tLock = self.locks[lockReceipt]
     for _, v in pairs(index) do
