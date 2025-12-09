@@ -54,6 +54,7 @@ function TransferTicket:execute(targetPeripheralName)
                 resource.quantity, slotOrName --[[@as string]]))
         end
         local result = stepInvoker:processAll()
+        -- 我去翻了一下相关代码，发现这个值是命令执行后转移的物品总数
         if result[1] ~= resource.quantity then
             errMessage = ("Something wrong happen")
             log.error(errMessage)
