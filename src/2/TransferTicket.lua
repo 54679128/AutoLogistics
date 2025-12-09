@@ -46,12 +46,12 @@ function TransferTicket:execute(targetPeripheralName)
         local stepInvoker = invoker()
         -- 是流体
         if type(slotOrName) == "string" then
+            stepInvoker:addCommand(fluidCommand(self.containerStack.peripheralName, targetPeripheralName,
+                resource.quantity, slotOrName --[[@as string]]))
+        else -- 是物品
             stepInvoker:addCommand(itemCommand(self.containerStack.peripheralName, targetPeripheralName,
                 slotOrName --[[@as number]],
                 resource.quantity))
-        else -- 是物品
-            stepInvoker:addCommand(fluidCommand(self.containerStack.peripheralName, targetPeripheralName,
-                resource.quantity, slotOrName --[[@as string]]))
         end
         local result = stepInvoker:processAll()
         -- 我去翻了一下相关代码，发现这个值是命令执行后转移的物品总数
