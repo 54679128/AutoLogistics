@@ -40,6 +40,62 @@ function ContainerStack:new()
     self.peripheralName = nil
 end
 
+--- 删除某个锁
+---@param lockReceipt LockReceipt
+function ContainerStack:abolishLock(lockReceipt)
+    if not self.locks[lockReceipt] then
+        return
+    end
+    self.locks[lockReceipt] = nil
+end
+
+--- 判断该锁是否可用
+---@param lockReceipt LockReceipt
+---@return boolean
+function ContainerStack:isAvailable(lockReceipt)
+    local errMessage
+    -- 检查锁是否存在
+    if not self.locks[lockReceipt] then
+        return false
+    end
+    -- 检查外设是否存在
+    local per = peripheral.wrap(self.peripheralName)
+    if not per then
+        errMessage = ("Peripheral %s doesn't exsit"):format(self.peripheralName)
+        log.warn(errMessage)
+        return false
+    end
+    local itemList
+    local fluidList
+    if per.list then
+        itemList = per.list()
+    end
+    if per.tanks then
+        fluidList = per.tanks()
+    end
+    for slotOrName, resource in pairs(self.locks[lockReceipt]) do
+        -- 如果是流体
+        if type(slotOrName) == "string" then
+            for _, fluidInfo in pairs(fluidList) do
+                if fluidInfo.name ~= slotOrName then
+                    goto continue
+                end
+                if fluidInfo.amount < resource.quantity then
+                    self.locks[lockReceipt] = nil
+                    return false
+                end
+                ::continue::
+            end
+        else -- 如果是物品
+            if itemList[slotOrName].count < resource.quantity then
+                self.locks[lockReceipt] = nil
+                return false
+            end
+        end
+    end
+    return true
+end
+
 function ContainerStack:saveAsFile(outFile)
     local file = io.open(outFile, "w+")
     assert(file, ("can't open %s"):format(outFile))
