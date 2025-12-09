@@ -56,6 +56,7 @@ function TransferTicket:execute(targetPeripheralName)
                 slotOrName --[[@as number]],
                 resource.quantity))
         end
+        -- 如果无法转移至目标容器，result[1]应该是false
         local result = stepInvoker:processAll()
         -- 我去翻了一下相关代码，发现这个值是命令执行后转移的物品总数
         if result[1] ~= resource.quantity then
