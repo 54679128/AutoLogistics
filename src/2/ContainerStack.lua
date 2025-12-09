@@ -239,6 +239,13 @@ function ContainerStack:getLock()
     return util.copyTable(self.locks)
 end
 
+--- 根据票据返回对应的锁的内容
+---@param lockReceipt LockReceipt
+---@return table<string|number, a546.Resource>|nil
+function ContainerStack:getResource(lockReceipt)
+    return util.copyTable(self.locks[lockReceipt])
+end
+
 --- 从本容器中可用储存中移除指定槽位/名称，并转移至不可用/锁定储存。
 ---@param index number|number[]|string|string[]|table<any,SlotOrName>
 ---@return LockReceipt
