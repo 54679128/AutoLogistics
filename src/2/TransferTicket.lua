@@ -24,7 +24,7 @@ function TransferTicket:isvaild()
 end
 
 --- 使用该支票
----
+---@param targetPeripheralName string
 function TransferTicket:execute(targetPeripheralName)
     self.run = true
     local errMessage
