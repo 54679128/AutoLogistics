@@ -4,16 +4,15 @@ local base = require("TransferCommand.TransferCommandBase")
 
 --- 实际执行命令的函数
 ---@param command CustomPrefix.Example
----@return boolean success # 执行过程中是否有意料外的错误
----@return any result # 函数执行过程中获取的信息
+---@return number transferResourceQuantity # 执行过程中传输的资源总数
 local function worker(command)
     local result
     -- 函数逻辑
     if "Something wrong" then
-        return false, nil
+        return 0
     end
     -- 做尽可能少的事，返回尽可能多的信息
-    return true, result
+    return result
 end
 
 ---@class CustomPrefix.Example:a546.TransferCommandBase
