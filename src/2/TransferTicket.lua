@@ -25,6 +25,7 @@ end
 
 --- 使用该支票
 ---@param targetPeripheralName string
+---@return boolean success
 function TransferTicket:execute(targetPeripheralName)
     self.run = true
     local errMessage
@@ -33,11 +34,13 @@ function TransferTicket:execute(targetPeripheralName)
     if not source then
         errMessage = ("Peripheral %s doesn't exsit"):format(self.containerStack.peripheralName)
         log.error(errMessage)
-        return
+        self.containerStack:abolishLock(self.lockReceipt)
+        return false
     end
     -- 检查资源是否足够
     if not self.containerStack:isAvailable(self.lockReceipt) then
-        return
+        self.containerStack:abolishLock(self.lockReceipt)
+        return false
     end
     local resourceList = self.containerStack:getResource(self.lockReceipt)
     -- 之前确认过这个票据对应的锁不是空的，所以这里写个注释告知编辑器
@@ -58,9 +61,12 @@ function TransferTicket:execute(targetPeripheralName)
         if result[1] ~= resource.quantity then
             errMessage = ("Something wrong happen")
             log.error(errMessage)
+            self.containerStack:abolishLock(self.lockReceipt)
+            return false
         end
     end
     self.containerStack:abolishLock(self.lockReceipt)
+    return true
 end
 
 return TransferTicket
