@@ -49,6 +49,9 @@ function ContainerStack:abolishLock(lockReceipt)
     self.locks[lockReceipt] = nil
 end
 
+--- 判断该锁是否可用
+---@param lockReceipt LockReceipt
+---@return boolean
 function ContainerStack:isAvailable(lockReceipt)
     local errMessage
     -- 检查锁是否存在
