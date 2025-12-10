@@ -19,7 +19,7 @@ end
 
 --- 返回该支票是否可用
 ---@return boolean
-function TransferTicket:isvaild()
+function TransferTicket:isAvailable()
     return not self.run
 end
 
