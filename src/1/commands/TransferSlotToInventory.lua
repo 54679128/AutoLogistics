@@ -2,12 +2,11 @@ local base = require("TransferCommandBase")
 local log = require("lib.log")
 
 ---@param command a546.TransferSlotToInventory
----@return boolean 是否成功
----@return number|string 相关信息
+---@return number
 local function worker(command)
     local sourcePeripheral = peripheral.wrap(command.sourcePeripheralName)
     if not sourcePeripheral then
-        return false, ("can't find peripheral %s"):format(command.sourcePeripheralName)
+        return 0
     end
     local result = 0
     local needTransfer = command.limit
@@ -25,7 +24,7 @@ local function worker(command)
             break
         end
     end
-    return true, result
+    return result
 end
 
 ---@class a546.TransferSlotToInventory:a546.TransferCommandBase
