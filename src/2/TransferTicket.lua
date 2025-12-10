@@ -27,6 +27,8 @@ end
 ---@param targetPeripheralName string
 ---@return boolean success
 function TransferTicket:execute(targetPeripheralName)
+    -- 考虑目标容器是一台机器，我不认为`ContainerStack`可以很好的描述一台运行中的机器——但确实，可以这么做——所以我确定使用目标外设名作为参数。
+
     self.run = true
     local function cleanup()
         self.containerStack:abolishLock(self.lockReceipt)
@@ -62,6 +64,7 @@ function TransferTicket:execute(targetPeripheralName)
         end
         -- 执行命令并检查是否转移了足够的物品
         local result = stepInvoker:processAll()
+        -- 如果转移到的容器是一台正在运行的机器，原料可能被瞬间处理、被锁在输入槽，总之没法拿回来，只能简单的中止传输并报错
         -- 因为只放了一条命令，所以这里填 1
         if resource.quantity ~= result[1].transferResource then
             cleanup()
