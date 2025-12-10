@@ -28,18 +28,21 @@ end
 ---@return boolean success
 function TransferTicket:execute(targetPeripheralName)
     self.run = true
+    local function cleanup()
+        self.containerStack:abolishLock(self.lockReceipt)
+    end
     local errMessage
     -- 检查容器是否存在
     local source = peripheral.wrap(self.containerStack.peripheralName)
     if not source then
         errMessage = ("Peripheral %s doesn't exist"):format(self.containerStack.peripheralName)
         log.error(errMessage)
-        self.containerStack:abolishLock(self.lockReceipt)
+        cleanup()
         return false
     end
     -- 检查资源是否足够
     if not self.containerStack:isAvailable(self.lockReceipt) then
-        self.containerStack:abolishLock(self.lockReceipt)
+        cleanup()
         return false
     end
     local resourceList = self.containerStack:getResource(self.lockReceipt)
@@ -47,6 +50,7 @@ function TransferTicket:execute(targetPeripheralName)
     ---@cast resourceList -nil
     for slotOrName, resource in pairs(resourceList) do
         local stepInvoker = invoker()
+        -- 下面将构造并插入命令
         -- 是流体
         if type(slotOrName) == "string" then
             stepInvoker:addCommand(fluidCommand(self.containerStack.peripheralName, targetPeripheralName,
@@ -56,17 +60,16 @@ function TransferTicket:execute(targetPeripheralName)
                 slotOrName --[[@as number]],
                 resource.quantity))
         end
-        -- 如果无法转移至目标容器，result[1]应该是false
+        -- 执行命令并检查是否转移了足够的物品
         local result = stepInvoker:processAll()
-        -- 我去翻了一下相关代码，发现这个值是命令执行后转移的物品总数
-        if result[1] ~= resource.quantity then
-            errMessage = ("Something wrong happen")
-            log.error(errMessage)
-            self.containerStack:abolishLock(self.lockReceipt)
+        -- 因为只放了一条命令，所以这里填 1
+        if resource.quantity ~= result[1].transferResource then
+            cleanup()
             return false
         end
+        stepInvoker:clear()
     end
-    self.containerStack:abolishLock(self.lockReceipt)
+    cleanup()
     return true
 end
 
