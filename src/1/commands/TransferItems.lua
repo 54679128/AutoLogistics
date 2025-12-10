@@ -1,12 +1,11 @@
 local base = require("TransferCommandBase")
 
 ---@param command a546.TransferItems
----@return boolean success # 执行过程中是否有意料外的错误
----@return number|string result # 函数执行过程中获取的信息
+---@return number
 local function transferItemInventory(command)
     local sourcePeripheral = peripheral.wrap(command.sourcePeripheralName)
     if not sourcePeripheral then
-        return false, ("can't find peripheral %s"):format(command.sourcePeripheralName)
+        return 0
     end
     local result = 0
     local itemList = sourcePeripheral.list()
@@ -19,7 +18,7 @@ local function transferItemInventory(command)
             end
         end
     end
-    return true, result
+    return result
 end
 
 ---@class a546.TransferItems:a546.TransferCommandBase
