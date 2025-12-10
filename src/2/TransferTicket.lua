@@ -32,7 +32,7 @@ function TransferTicket:execute(targetPeripheralName)
     -- 检查容器是否存在
     local source = peripheral.wrap(self.containerStack.peripheralName)
     if not source then
-        errMessage = ("Peripheral %s doesn't exsit"):format(self.containerStack.peripheralName)
+        errMessage = ("Peripheral %s doesn't exist"):format(self.containerStack.peripheralName)
         log.error(errMessage)
         self.containerStack:abolishLock(self.lockReceipt)
         return false
