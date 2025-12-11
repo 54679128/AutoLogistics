@@ -165,6 +165,11 @@ function ContainerStack:scan(peripheralName)
         log.warn(("peripheral %s can't find"):format(peripheralName))
         return nil, ("peripheral %s can't find"):format(peripheralName)
     end
+    if not ContainerStack.isContainer(peripheralName) then
+        local errMessage = ("Peripheral %s is't a Container"):format(peripheralName)
+        log.error(errMessage)
+        return nil, errMessage
+    end
     if scanObj.tanks then
         for _, fluidInfo in pairs(scanObj.tanks()) do
             -- 由于流体和物品的格式不一样，这里要整理一下
@@ -213,6 +218,11 @@ function ContainerStack:scanBySlot(peripheralName, slot)
     local scanObj = peripheral.wrap(peripheralName)
     if not scanObj then
         log.warn(("peripheral %s can't find"):format(peripheralName))
+        return nil
+    end
+    if not ContainerStack.isContainer(peripheralName) then
+        local errMessage = ("Peripheral %s is't a Container"):format(peripheralName)
+        log.error(errMessage)
         return nil
     end
     -- 检查该槽位是否存在
