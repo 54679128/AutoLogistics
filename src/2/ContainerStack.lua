@@ -118,6 +118,75 @@ function ContainerStack:isAvailable(lockReceipt)
     return true
 end
 
+--- 更新指定容器缓存
+---@param slotOrName SlotOrName|nil
+---@return boolean success
+function ContainerStack:updata(slotOrName)
+    local errMessage
+    local per = peripheral.wrap(self.peripheralName)
+    if not per then
+        errMessage = ("Peripheral %s doesn't exist"):format(self.peripheralName)
+        log.error(errMessage)
+        return false
+    end
+    if type(slotOrName) == "string" then
+        if not per.tanks then
+            errMessage = ("Try to updata unist resource: %s in peripheral %s"):format(slotOrName, self.peripheralName)
+            log.warn(errMessage)
+            return false
+        end
+        local fluidList = per.tanks()
+        for _, fluidInfo in pairs(fluidList) do
+            if fluidInfo.name == slotOrName then
+                ---@type a546.Resource
+                local resourceFormat = {
+                    name = slotOrName,
+                    quantity = fluidInfo.amount,
+                    resourceType = "fluid"
+                }
+                self.slots[slotOrName] = resourceFormat
+                return true
+            end
+        end
+    elseif type(slotOrName) == "number" then
+        if not per.list then
+            errMessage = ("Try to updata unacceptable resource: item in peripheral %s"):format(
+                self.peripheralName)
+            log.warn(errMessage)
+            return false
+        end
+        local itemList = per.list()
+        if not itemList[slotOrName] then
+            errMessage = ("Try to updata slot of unist resource in peripheral %s"):format(self
+                .peripheralName)
+            log.warn(errMessage)
+            return true
+        end
+        ---@type a546.Resource
+        local resourceFormat = {
+            name = itemList[slotOrName].name,
+            quantity = itemList[slotOrName].count,
+            nbt = itemList[slotOrName].nbt,
+            detail = function()
+                local rep = peripheral.wrap(self.peripheralName)
+                if not rep then
+                    log.warn("Peripheral %s doesn't exist"):format(self.peripheralName)
+                    return nil
+                end
+                if not rep.getItemDetail then
+                    return nil
+                end
+                return rep.getItemDetail(slotOrName)
+            end,
+            resourceType = "item"
+        }
+        self.slots[slotOrName] = resourceFormat
+    else
+        self:scan(self.peripheralName)
+    end
+    return true
+end
+
 function ContainerStack:saveAsFile(outFile)
     local file = io.open(outFile, "w+")
     assert(file, ("can't open %s"):format(outFile))
