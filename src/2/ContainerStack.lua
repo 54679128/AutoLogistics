@@ -109,6 +109,10 @@ function ContainerStack:isAvailable(lockReceipt)
                 ::continue::
             end
         else -- 如果是物品
+            if not itemList[slotOrName] then
+                self.locks[lockReceipt] = nil
+                return false
+            end
             if itemList[slotOrName].count < resource.quantity then
                 self.locks[lockReceipt] = nil
                 return false
