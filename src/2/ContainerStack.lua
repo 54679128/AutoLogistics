@@ -40,6 +40,28 @@ function ContainerStack:new()
     self.peripheralName = nil
 end
 
+--- 判断输入外设名所代表的外设是否为一个容器。
+---@param peripheralName string
+---@return boolean
+function ContainerStack.isContainer(peripheralName)
+    local per = peripheral.wrap(peripheralName)
+    local errMessage
+    if not per then
+        errMessage = ("Peripheral %s doesn't exist"):format(peripheralName)
+        log.error(errMessage)
+        return false
+    end
+    -- 物品容器
+    if per.list and per.pullItems and per.pushItems then
+        return true
+    end
+    -- 流体容器
+    if per.tanks and per.pushFluid and per.pullFluid then
+        return true
+    end
+    return false
+end
+
 --- 删除某个锁
 ---@param lockReceipt LockReceipt
 function ContainerStack:abolishLock(lockReceipt)
@@ -143,6 +165,11 @@ function ContainerStack:scan(peripheralName)
         log.warn(("peripheral %s can't find"):format(peripheralName))
         return nil, ("peripheral %s can't find"):format(peripheralName)
     end
+    if not ContainerStack.isContainer(peripheralName) then
+        local errMessage = ("Peripheral %s is't a Container"):format(peripheralName)
+        log.error(errMessage)
+        return nil, errMessage
+    end
     if scanObj.tanks then
         for _, fluidInfo in pairs(scanObj.tanks()) do
             -- 由于流体和物品的格式不一样，这里要整理一下
@@ -191,6 +218,11 @@ function ContainerStack:scanBySlot(peripheralName, slot)
     local scanObj = peripheral.wrap(peripheralName)
     if not scanObj then
         log.warn(("peripheral %s can't find"):format(peripheralName))
+        return nil
+    end
+    if not ContainerStack.isContainer(peripheralName) then
+        local errMessage = ("Peripheral %s is't a Container"):format(peripheralName)
+        log.error(errMessage)
         return nil
     end
     -- 检查该槽位是否存在
