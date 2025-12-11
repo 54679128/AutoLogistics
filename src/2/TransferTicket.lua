@@ -65,8 +65,12 @@ function TransferTicket:execute(targetPeripheralName)
         -- 执行命令并检查是否转移了足够的物品
         local result = stepInvoker:processAll()
         -- 如果转移到的容器是一台正在运行的机器，原料可能被瞬间处理、被锁在输入槽，总之没法拿回来，只能简单的中止传输并报错
+        -- 按照issue中的设计，这里应该更新相关槽位
         -- 因为只放了一条命令，所以这里填 1
         if resource.quantity ~= result[1].transferResource then
+            if not self.containerStack:updata(slotOrName) then
+                log.warn(("Try update %s fail in %s"):format(self.containerStack.peripheralName, tostring(slotOrName)))
+            end
             cleanup()
             return false
         end
