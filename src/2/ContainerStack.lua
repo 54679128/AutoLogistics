@@ -123,7 +123,7 @@ function ContainerStack:isAvailable(lockReceipt)
 end
 
 --- 更新指定容器缓存
----@param slotOrName SlotOrName|nil
+---@param slotOrName? SlotOrName
 ---@return boolean success
 function ContainerStack:updata(slotOrName)
     local errMessage
