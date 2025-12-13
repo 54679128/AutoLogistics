@@ -13,6 +13,30 @@ function out.withName(name)
     end)
 end
 
+--- 按种类过滤
+---@param resourceType "item"|"fluid"|string
+---@return a546.Filter
+function out.withType(resourceType)
+    return Filter(function(resource)
+        if resource.resourceType == resourceType then
+            return true
+        end
+        return false
+    end)
+end
+
+--- 按堆叠数量过滤
+---@param quantity number
+---@return a546.Filter
+function out.withQuantity(quantity)
+    return Filter(function(resource)
+        if resource.quantity == quantity then
+            return true
+        end
+        return false
+    end)
+end
+
 --- 按标签过滤
 ---@param tag string
 ---@return a546.Filter
