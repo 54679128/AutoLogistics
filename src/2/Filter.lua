@@ -1,5 +1,6 @@
 local O = require("lib.Object")
 
+-- 注意，谓词不应该修改参数
 ---@class a546.Filter
 ---@field predicate fun(resource:a546.Resource):boolean
 local Filter = O:extend()
