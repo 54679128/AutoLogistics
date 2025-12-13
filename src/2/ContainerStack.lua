@@ -286,6 +286,7 @@ end
 ---@param peripheralName string
 ---@param slot number
 ---@return nil|a546.ContainerStack
+---@deprecated
 function ContainerStack:scanBySlot(peripheralName, slot)
     -- 检查外设上是否存在
     local scanObj = peripheral.wrap(peripheralName)
