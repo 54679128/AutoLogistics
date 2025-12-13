@@ -12,20 +12,20 @@ function Filter:new(predicate)
 end
 
 --- AND
----@param filiter a546.Filter
+---@param filter a546.Filter
 ---@return a546.Filter
-function Filter:And(filiter)
+function Filter:And(filter)
     return Filter(function(ItemStack)
-        return self.predicate(ItemStack) and filiter.predicate(ItemStack)
+        return self.predicate(ItemStack) and filter.predicate(ItemStack)
     end)
 end
 
 --- OR
----@param filiter a546.Filter
+---@param filter a546.Filter
 ---@return a546.Filter
-function Filter:Or(filiter)
+function Filter:Or(filter)
     return Filter(function(ItemStack)
-        return self.predicate(ItemStack) or filiter.predicate(ItemStack)
+        return self.predicate(ItemStack) or filter.predicate(ItemStack)
     end)
 end
 
