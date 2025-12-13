@@ -20,12 +20,14 @@ function WarehouseManager:new()
     self.lockKey = {}
     self.containerIndex = {}
     self.resourceIndex = {}
+    self.inputInterface = {}
+    self.outputInterface = {}
+    self.remindInterface = {}
 end
 
 --- 将容器作为存储容器加入仓库
 ---@param peripheralName string
 ---@return boolean success
----@deprecated
 function WarehouseManager:addAsContainer(peripheralName)
     if not ContainerStack.isContainer(peripheralName) then
         log.warn(("Peripheral %s isn't container"):format(peripheralName))
@@ -59,7 +61,6 @@ end
 --- 将某个存储用容器移出仓库
 ---@param peripheralName string
 ---@return boolean success
----@deprecated
 function WarehouseManager:removeContainer(peripheralName)
     if not self.containerIndex[peripheralName] then
         log.warn(("Try to remove unist container %s"):format("peripheralName"))
@@ -78,7 +79,6 @@ end
 --- 将某个容器作为仓库的输入接口
 ---@param peripheralName string
 ---@return boolean success
----@deprecated
 function WarehouseManager:addAsInputInterface(peripheralName)
     if not self.containerIndex[peripheralName] then
         log.warn(("Peripheral %s isn't container"):format("peripheralName"))
@@ -90,10 +90,21 @@ function WarehouseManager:addAsInputInterface(peripheralName)
     return true
 end
 
+--- 移除某个输入接口
+---@param peripheralName string
+---@return boolean success
+function WarehouseManager:removeInputInterface(peripheralName)
+    if not self.inputInterface[peripheralName] then
+        log.warn(("Try to remove unist InputInterface %s"):format("peripheralName"))
+        return false
+    end
+    self.inputInterface[peripheralName] = nil
+    return true
+end
+
 --- 将某个容器作为仓库的输出接口
 ---@param peripheralName string
 ---@return boolean success
----@deprecated
 function WarehouseManager:addAsOutputInterface(peripheralName)
     if not self.containerIndex[peripheralName] then
         log.warn(("Peripheral %s isn't container"):format("peripheralName"))
@@ -106,7 +117,6 @@ end
 --- 将某个容器作为仓库的保持接口
 ---@param peripheralName string
 ---@return boolean success
----@deprecated
 function WarehouseManager:addAsRemindInterface(peripheralName)
     if not self.containerIndex[peripheralName] then
         log.warn(("Peripheral %s isn't container"):format("peripheralName"))
@@ -114,8 +124,15 @@ function WarehouseManager:addAsRemindInterface(peripheralName)
     end
     local remindContainer = ContainerStack()
     remindContainer:scan(peripheralName)
-    self.inputInterface[peripheralName] = remindContainer
+    self.remindInterface[peripheralName] = remindContainer
     return true
+end
+
+--- 查询是否存在相关物品并返回一个列表
+---@param name string
+---@param limit number
+function WarehouseManager:search(name, limit)
+
 end
 
 return WarehouseManager
