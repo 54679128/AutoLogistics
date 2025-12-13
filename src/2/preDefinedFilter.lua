@@ -5,8 +5,8 @@ local out = {}
 ---@param name string
 ---@return a546.Filter
 function out.withName(name)
-    return Filter(function(itemStack)
-        if itemStack.name == name then
+    return Filter(function(resource)
+        if resource.name == name then
             return true
         end
         return false
@@ -17,8 +17,17 @@ end
 ---@param tag string
 ---@return a546.Filter
 function out.withTag(tag)
-    return Filter(function(itemStack)
-        if itemStack.tags and itemStack.tags[tag] then
+    return Filter(function(resource)
+        -- 不能存在detail函数，无法判断tag
+        if not resource.detail then
+            return false
+        end
+        local detail = resource.detail()
+        -- detail函数因为某种原因失败了？
+        if not detail then
+            return false
+        end
+        if detail.tags and detail.tags[tag] then
             return true
         end
         return false
@@ -29,8 +38,8 @@ end
 ---@param nbt string
 ---@return a546.Filter
 function out.withNbt(nbt)
-    return Filter(function(itemStack)
-        if itemStack.nbt and itemStack.nbt == nbt then
+    return Filter(function(resource)
+        if resource.nbt and resource.nbt == nbt then
             return true
         end
         return false
@@ -41,8 +50,17 @@ end
 ---@param displayName string
 ---@return a546.Filter
 function out.withDisplayName(displayName)
-    return Filter(function(itemStack)
-        if itemStack.displayName and itemStack.displayName == displayName then
+    return Filter(function(resource)
+        -- 不能存在detail函数，无法判断tag
+        if not resource.detail then
+            return false
+        end
+        local detail = resource.detail()
+        -- detail函数因为某种原因失败了？
+        if not detail then
+            return false
+        end
+        if detail.displayName and detail.displayName == displayName then
             return true
         end
         return false
