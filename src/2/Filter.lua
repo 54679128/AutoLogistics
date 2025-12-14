@@ -1,10 +1,11 @@
 local O = require("lib.Object")
 
+-- 注意，谓词不应该修改参数
 ---@class a546.Filter
----@field predicate fun(ItemStack:a546.ItemStack):boolean
+---@field predicate fun(resource:a546.Resource):boolean
 local Filter = O:extend()
 
----@cast Filter +fun(predicate:fun(ItemStack:a546.ItemStack):boolean):a546.Filter
+---@cast Filter +fun(predicate:fun(resource:a546.Resource):boolean):a546.Filter
 function Filter:new(predicate)
     self.predicate = predicate or function()
         return true
@@ -12,28 +13,28 @@ function Filter:new(predicate)
 end
 
 --- AND
----@param filiter a546.Filter
+---@param filter a546.Filter
 ---@return a546.Filter
-function Filter:And(filiter)
-    return Filter(function(ItemStack)
-        return self.predicate(ItemStack) and filiter.predicate(ItemStack)
+function Filter:And(filter)
+    return Filter(function(resource)
+        return self.predicate(resource) and filter.predicate(resource)
     end)
 end
 
 --- OR
----@param filiter a546.Filter
+---@param filter a546.Filter
 ---@return a546.Filter
-function Filter:Or(filiter)
-    return Filter(function(ItemStack)
-        return self.predicate(ItemStack) or filiter.predicate(ItemStack)
+function Filter:Or(filter)
+    return Filter(function(resource)
+        return self.predicate(resource) or filter.predicate(resource)
     end)
 end
 
 --- NOT
 ---@return a546.Filter
 function Filter:Not()
-    return Filter(function(ItemStack)
-        return not self.predicate(ItemStack)
+    return Filter(function(resource)
+        return not self.predicate(resource)
     end)
 end
 
