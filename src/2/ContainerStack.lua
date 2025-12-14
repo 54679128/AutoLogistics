@@ -123,7 +123,7 @@ function ContainerStack:isAvailable(lockReceipt)
 end
 
 --- 更新指定容器缓存
----@param slotOrName SlotOrName|nil
+---@param slotOrName? SlotOrName
 ---@return boolean success
 function ContainerStack:updata(slotOrName)
     local errMessage
@@ -286,6 +286,7 @@ end
 ---@param peripheralName string
 ---@param slot number
 ---@return nil|a546.ContainerStack
+---@deprecated
 function ContainerStack:scanBySlot(peripheralName, slot)
     -- 检查外设上是否存在
     local scanObj = peripheral.wrap(peripheralName)
