@@ -56,10 +56,10 @@ function ContainerStackM:release(receipt)
     self.resourceManager:release(receipt)
 end
 
---- 尝试删除错误的预定记录
+--- 尝试删除错误或已消耗的预定记录
 ---@param receipt Receipt
-function ContainerStackM:invalidate(receipt)
-    self.resourceManager:invalidate(receipt)
+function ContainerStackM:consume(receipt)
+    self.resourceManager:consume(receipt)
 end
 
 --- 获取预留的资源信息

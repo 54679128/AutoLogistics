@@ -135,9 +135,9 @@ function ResourceManager:release(receipt)
     self.createdAt[receipt] = nil
 end
 
---- 删除错误的预定记录
+--- 删除错误或已消耗的预定记录
 ---@param receipt Receipt
-function ResourceManager:invalidate(receipt)
+function ResourceManager:consume(receipt)
     if not self.reserveResources[receipt] then
         log.warn(("Try to delete doesn't exist receipt %s"):format(receipt))
         return

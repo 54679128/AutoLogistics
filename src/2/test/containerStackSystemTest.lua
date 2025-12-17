@@ -31,7 +31,7 @@ log.info("Testing: ContainerScan, ResourceManager, ContainerStackM")
 log.info("\n=== Test 1: ContainerScan Module ===")
 log.info("Testing isContainer function...")
 
--- 测试存在的容器 
+-- 测试存在的容器
 local containerName = "left"
 local isContainer = ContainerScan.isContainer(containerName)
 log.info(string.format("Container '%s' is container: %s", containerName, tostring(isContainer)))
@@ -353,7 +353,7 @@ if remainingNeed == 0 then
         log.info("5. Simulating crafting process...")
         sleep(1)
 
-        workflowRM:invalidate(workflowReceipt)
+        workflowRM:consume(workflowReceipt)
         log.info("6. Crafting completed, receipt invalidated")
 
         local afterCraftCobble = workflowRM:search(cobbleFilter)
