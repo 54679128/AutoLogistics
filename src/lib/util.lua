@@ -48,4 +48,15 @@ function out.generateRandomString(length)
     return table.concat(result)
 end
 
+--- 获取任意表包含的元素数量
+---@param tTable table
+---@return number
+function out.len(tTable)
+    local i = 0
+    for _, _ in pairs(tTable) do
+        i = i + 1
+    end
+    return i
+end
+
 return out
