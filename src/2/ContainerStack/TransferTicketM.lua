@@ -44,6 +44,7 @@ function TransferTicketM:use(targetPeripheralName)
     end
     if not self:isAvailable() then
         cleanup()
+        self.containerStack:release(self.receipt)
         return false
     end
     -- 已验证票据可用，所以reserve必不为nil
