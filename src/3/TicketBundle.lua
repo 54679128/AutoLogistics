@@ -1,4 +1,5 @@
 local Object = require("lib.Object")
+local log = require("lib.log")
 
 ---@class a546.TicketBundle
 ---@field private tickets table<Receipt,a546.TransferTicketM>
@@ -7,6 +8,7 @@ local TicketBundle = Object:extend()
 
 ---@cast TicketBundle +fun():a546.TicketBundle
 function TicketBundle:new()
+    log.trace(("Create TicketBundle %s"):format(tostring(self)))
     self.tickets = {}
     self.usage = false
 end
@@ -15,6 +17,7 @@ end
 ---@param receipt Receipt
 ---@param ticket a546.TransferTicketM
 function TicketBundle:add(receipt, ticket)
+    log.trace(("Add ticket %s / %s to ticketBundle %s"):format(tostring(ticket), receipt, tostring(self)))
     self.tickets[receipt] = ticket
 end
 
@@ -24,6 +27,7 @@ end
 function TicketBundle:remove(receipt)
     local result = self.tickets[receipt]
     self.tickets[receipt] = nil
+    log.trace(("Remove ticket %s from ticketBundle %s"):format(receipt, tostring(self)))
     return result
 end
 
@@ -36,7 +40,9 @@ function TicketBundle:run(targetPeripheralName)
     end
     for _, ticket in pairs(self.tickets) do
         local success = ticket:use(targetPeripheralName)
+        log.trace(("Ticket %s successful use"):format(tostring(ticket)))
         if not success then
+            log.trace(("Ticket %s fail when use"):format(tostring(ticket)))
             self.usage = true
         end
     end
