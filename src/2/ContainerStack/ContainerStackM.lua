@@ -27,7 +27,7 @@ end
 
 --- 根据过滤器检查容器内部是否有符合要求的资源
 ---@param filter any
----@return searchResult|{} searchResult
+---@return searchResult|nil searchResult
 function ContainerStackM:search(filter)
     return self.resourceManager:search(filter)
 end
