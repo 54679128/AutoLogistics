@@ -38,9 +38,9 @@ end
 
 --- 根据过滤器查找可用资源
 ---@param filter a546.Filter
----@return searchResult|{} searchResult
+---@return searchResult|nil searchResult
 function ResourceManager:search(filter)
-    ---@type searchResult|{}
+    ---@type searchResult|table
     local result = {}
     for slotOrName, resource in pairs(self.resources) do
         if not filter.predicate(resource) then
@@ -48,6 +48,9 @@ function ResourceManager:search(filter)
         end
         result[slotOrName] = { name = resource.name, quantity = resource.quantity }
         ::continue::
+    end
+    if not next(result) then
+        return nil
     end
     return result
 end
