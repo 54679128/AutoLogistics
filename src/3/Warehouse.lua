@@ -71,6 +71,7 @@ function Warehouse:add(peripheralName, containerType, filter)
         return false
     end
     CONTAINER_TYPE[containerType].insert(peripheralName, self, filter)
+    log.trace(("Add %s to type %s"):format(peripheralName, containerType))
     return true
 end
 
@@ -94,6 +95,7 @@ end
 ---@param filter a546.Filter
 ---@return table<string,searchResult>
 function Warehouse:search(filter)
+    log.trace(("Try search resource by %s"):format(filter.predicate))
     local result = {}
     for _, storage in pairs(self.storageContainerList) do
         local searchResult = storage:search(filter)
@@ -106,6 +108,7 @@ end
 ---@param searchResult table<string,searchResult>
 ---@return a546.TicketBundle|nil
 function Warehouse:getTicket(searchResult)
+    log.trace(("Someone try to get a ticket"))
     ---@type table<string,Receipt>
     local receiptBook = {}
     -- 预定资源
@@ -127,6 +130,7 @@ function Warehouse:getTicket(searchResult)
         local ticket = TransferTicketM(self.storageContainerList[name], receipt)
         bundle:add(receipt, ticket)
     end
+    log.trace(("Someone get a ticket %s"):format(bundle))
     return bundle
 end
 
@@ -141,9 +145,11 @@ function Warehouse:randomRefresh()
         end
     end
     if #container < 1 then
+        log.warn(("Try to refresh a storage,but have't any container that meet the criteria"))
         return
     end
     local randomIndex = math.random(#container)
+    log.trace(("Try to refresh %s"):format(container[randomIndex].peripheralName))
     container[randomIndex]:refresh()
 end
 
@@ -156,6 +162,7 @@ function Warehouse:output()
         table.insert(container, v)
     end
     if #container < 1 then
+        log.warn(("Try to find a outputContainer to output,but have't any output"))
         return
     end
     local randomIndex = math.random(#container)
@@ -168,6 +175,7 @@ function Warehouse:output()
     if not ticket then
         return
     end
+    log.trace(("Try to output resource to %s"):format(randomOutput.container.peripheralName))
     ticket:run(randomOutput.container.peripheralName)
 end
 
@@ -181,6 +189,7 @@ function Warehouse:input()
         table.insert(inputContainer, v)
     end
     if #inputContainer < 1 then
+        log.warn(("Try to find a inputContainer to input,but have't any input"))
         return
     end
     local randomInputIndex = math.random(#inputContainer)
@@ -232,12 +241,15 @@ function Warehouse:run()
     while true do
         local eventData = { os.pullEvent() }
         if eventData[1] == "timer" and eventData[2] == lastRandomRefresh then
+            log.info(("Try to random refresh a storage"))
             self:randomRefresh()
             lastRandomRefresh = os.startTimer(refreshInterval)
         elseif eventData[1] == "timer" and eventData[2] == lastRandomOutput then
+            log.info(("Try to random pick a output to fart"))
             self:output()
             lastRandomOutput = os.startTimer(outputInterval)
         elseif eventData[1] == "timer" and eventData[2] == lastRandomInput then
+            log.info(("Try to random pick a input to fart"))
             self:input()
             lastRandomInput = os.startTimer(inputInterval)
         end
