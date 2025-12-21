@@ -161,7 +161,7 @@ function Warehouse:output()
     local randomIndex = math.random(#container)
     local randomOutput = container[randomIndex]
     local searchResult = self:search(randomOutput.filter)
-    if not next(searchResult) then
+    if not searchResult then
         return
     end
     local ticket = self:getTicket(searchResult)
