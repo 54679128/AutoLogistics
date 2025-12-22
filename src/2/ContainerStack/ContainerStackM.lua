@@ -6,6 +6,7 @@ local log             = require "lib.log"
 ---@class a546.ContainerStackM
 local ContainerStackM = Object:extend()
 
+---@cast ContainerStackM +fun(peripheralName:string):a546.ContainerStackM
 function ContainerStackM:new(peripheralName)
     self.peripheralName = peripheralName
     self.updateTime = os.epoch("local")
@@ -26,7 +27,7 @@ end
 
 --- 根据过滤器检查容器内部是否有符合要求的资源
 ---@param filter any
----@return searchResult|{} searchResult
+---@return searchResult|nil searchResult
 function ContainerStackM:search(filter)
     return self.resourceManager:search(filter)
 end
