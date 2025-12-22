@@ -229,29 +229,32 @@ function Warehouse:run()
     local refreshInterval = 4
     local outputInterval = 1
     local inputInterval = 1.9
-    -- 启动定时器并保存id
 
-    -- 刷新计时器id
-    local lastRandomRefresh = os.startTimer(refreshInterval)
-    -- 输出计时器id
-    local lastRandomOutput = os.startTimer(outputInterval)
-    -- 输入计时器id
-    local lastRandomInput = os.startTimer(inputInterval)
+    local lastRefresh = os.epoch("local")
+    local lastOutput = os.epoch("local")
+    local lastInput = os.epoch("local")
 
     while true do
-        local eventData = { os.pullEvent() }
-        if eventData[1] == "timer" and eventData[2] == lastRandomRefresh then
-            log.info(("Try to random refresh a storage"))
+        -- 启动定时器
+        os.startTimer(0)
+        local eventData = { os.pullEvent("timer") }
+        if os.epoch("local") - lastRefresh > refreshInterval * 1000 then
+            log.info("Refresh")
             self:randomRefresh()
-            lastRandomRefresh = os.startTimer(refreshInterval)
-        elseif eventData[1] == "timer" and eventData[2] == lastRandomOutput then
-            log.info(("Try to random pick a output to fart"))
+            lastRefresh = os.epoch("local")
+            log.info("Refresh end")
+        end
+        if os.epoch("local") - lastOutput > outputInterval * 1000 then
+            log.info("Output")
             self:output()
-            lastRandomOutput = os.startTimer(outputInterval)
-        elseif eventData[1] == "timer" and eventData[2] == lastRandomInput then
-            log.info(("Try to random pick a input to fart"))
+            lastOutput = os.epoch("local")
+            log.info("Output end")
+        end
+        if os.epoch("local") - lastInput > inputInterval * 1000 then
+            log.info("Input")
             self:input()
-            lastRandomInput = os.startTimer(inputInterval)
+            lastInput = os.epoch("local")
+            log.info("Input end")
         end
     end
 end
