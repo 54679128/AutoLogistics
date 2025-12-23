@@ -1,7 +1,7 @@
 local Object = require("lib.Object")
 local log = require("lib.log")
 log.outfile = "log.txt"
-log.usecolor = false
+--log.usecolor = false
 
 ---@class a546.CommandInvoker
 ---@field commands a546.TransferCommandBase[]
