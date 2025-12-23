@@ -24,12 +24,12 @@ log.level = "trace"
 
 
 local modes = {
-    { name = "trace", color = "\27[34m", },
-    { name = "debug", color = "\27[36m", },
-    { name = "info",  color = "\27[32m", },
-    { name = "warn",  color = "\27[33m", },
-    { name = "error", color = "\27[31m", },
-    { name = "fatal", color = "\27[35m", },
+    { name = "trace", color = colors.blue, },
+    { name = "debug", color = colors.cyan, },
+    { name = "info",  color = colors.green, },
+    { name = "warn",  color = colors.yellow, },
+    { name = "error", color = colors.red, },
+    { name = "fatal", color = colors.purple, },
 }
 
 ---@type table<number,table>
@@ -74,6 +74,15 @@ for i, x in ipairs(modes) do
         local info = debug.getinfo(2, "Sl")
         local lineinfo = info.short_src .. ":" .. info.currentline
 
+        local tempColor = term.getTextColor()
+        if log.usecolor then
+            term.setTextColor(x.color)
+        end
+        write(("[%-6s%s] "):format(nameupper, os.date("%H:%M:%S")))
+        term.setTextColor(tempColor)
+        write(("%s: %s\n"):format(lineinfo, msg))
+
+        --[[
         -- Output to console
         print(string.format("%s[%-6s%s]%s %s: %s",
             log.usecolor and x.color or "",
@@ -82,6 +91,7 @@ for i, x in ipairs(modes) do
             log.usecolor and "\27[0m" or "",
             lineinfo,
             msg))
+        ]]
 
         -- Output to log file
         if log.outfile then
