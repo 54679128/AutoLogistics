@@ -8,7 +8,6 @@ local TicketBundle = Object:extend()
 
 ---@cast TicketBundle +fun():a546.TicketBundle
 function TicketBundle:new()
-    log.trace(("Create TicketBundle %s"):format(tostring(self)))
     self.tickets = {}
     self.usage = false
 end
