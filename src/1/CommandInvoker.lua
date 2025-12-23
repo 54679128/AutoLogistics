@@ -39,14 +39,15 @@ function CommandInvoker:processAll()
             transferResource = 0,
             errMessage = nil
         }
-        ---@type [boolean,number]|[boolean,string,number]
+        ---@type [boolean,number]|[boolean,string,unknown]
         local k = table.pack(pcall(handler, command))
         if not k[1] then
             -- 找到或自己写了一个日志模块后这里加上相应日志代码
             --print(("Command %s execution failed"):format(command.commandType))
             --print(("error message: %s"):format(tostring(k[2])))
             resultFormat.errMessage = k[2]
-            resultFormat.transferResource = k[3]
+            -- 如果转移命令出了错，没有任何办法知道到底转移了多少资源，一半？全部？或者全都没有？无从得知
+            resultFormat.transferResource = -1
             log.warn(("Command %s execution failed: %s"):format(command.commandType, tostring(k[2])))
         else
             log.trace(("Command %s success"):format(command.commandType))
