@@ -63,9 +63,9 @@ function TransferTicketM:use(targetPeripheralName)
         if transferQuantityResult[1].transferResource ~= info.quantity then
             cleanup()
             self.containerStack:consume(self.receipt)
-            log.warn(("The actual transfer quantity: %d isn't equal to the scheduled transfer quantity: %d"):format(
-                transferQuantityResult[1].transferResource, info.quantity))
-            if not transferQuantityResult[1].errMessage then
+            log.warn(("The actual transfer quantity: %s isn't equal to the scheduled transfer quantity: %s"):format(
+                tostring(transferQuantityResult[1].transferResource), tostring(info.quantity)))
+            if transferQuantityResult[1].errMessage then
                 log.error(transferQuantityResult[1].errMessage)
             end
             return false
