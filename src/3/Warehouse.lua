@@ -239,22 +239,22 @@ function Warehouse:run()
         os.startTimer(0)
         local eventData = { os.pullEvent("timer") }
         if os.epoch("local") - lastRefresh > refreshInterval * 1000 then
-            log.info("Refresh")
+            log.trace("Refresh")
             self:randomRefresh()
             lastRefresh = os.epoch("local")
-            log.info("Refresh end")
+            log.trace("Refresh end")
         end
         if os.epoch("local") - lastOutput > outputInterval * 1000 then
-            log.info("Output")
+            log.trace("Output")
             self:output()
             lastOutput = os.epoch("local")
-            log.info("Output end")
+            log.trace("Output end")
         end
         if os.epoch("local") - lastInput > inputInterval * 1000 then
-            log.info("Input")
+            log.trace("Input")
             self:input()
             lastInput = os.epoch("local")
-            log.info("Input end")
+            log.trace("Input end")
         end
     end
 end

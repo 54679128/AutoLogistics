@@ -8,7 +8,6 @@ local TicketBundle = Object:extend()
 
 ---@cast TicketBundle +fun():a546.TicketBundle
 function TicketBundle:new()
-    log.trace(("Create TicketBundle %s"):format(tostring(self)))
     self.tickets = {}
     self.usage = false
 end
@@ -17,7 +16,7 @@ end
 ---@param receipt Receipt
 ---@param ticket a546.TransferTicketM
 function TicketBundle:add(receipt, ticket)
-    log.trace(("Add ticket %s / %s to ticketBundle %s"):format(tostring(ticket), receipt, tostring(self)))
+    log.trace(("Add ticket %s / %s to ticketBundle %s"):format(ticket, receipt, self))
     self.tickets[receipt] = ticket
 end
 
@@ -27,7 +26,7 @@ end
 function TicketBundle:remove(receipt)
     local result = self.tickets[receipt]
     self.tickets[receipt] = nil
-    log.trace(("Remove ticket %s from ticketBundle %s"):format(receipt, tostring(self)))
+    log.trace(("Remove ticket %s from ticketBundle %s"):format(receipt, self))
     return result
 end
 
@@ -40,9 +39,9 @@ function TicketBundle:run(targetPeripheralName)
     end
     for _, ticket in pairs(self.tickets) do
         local success = ticket:use(targetPeripheralName)
-        log.trace(("Ticket %s successful use"):format(tostring(ticket)))
+        log.trace(("Ticket %s successful use"):format(ticket))
         if not success then
-            log.trace(("Ticket %s fail when use"):format(tostring(ticket)))
+            log.trace(("Ticket %s fail when use"):format(ticket))
             self.usage = true
         end
     end
