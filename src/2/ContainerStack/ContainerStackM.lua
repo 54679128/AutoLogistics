@@ -2,27 +2,44 @@ local Object          = require "lib.Object"
 local ContainerScan   = require "ContainerStack.ContainerScan"
 local ResourceManager = require "ContainerStack.ResourceManager"
 local log             = require "lib.log"
+local util            = require "lib.util"
 
 ---@class a546.ContainerStackM
+---@field private resourceType table<string,boolean>
 local ContainerStackM = Object:extend()
 
 ---@cast ContainerStackM +fun(peripheralName:string):a546.ContainerStackM
 function ContainerStackM:new(peripheralName)
     self.peripheralName = peripheralName
     self.updateTime = os.epoch("local")
+    self.resourceType = {}
     self.resourceManager = ResourceManager()
 end
 
 --- 刷新内部资源缓存，使其与实际容器内容同步
 ---@return boolean success
 function ContainerStackM:refresh()
-    local resources = ContainerScan.scan(self.peripheralName)
+    local resources, resourceType = ContainerScan.scan(self.peripheralName)
     if not resources then
         log.warn(("Can't scan peripheral %s"):format(self.peripheralName))
         return false
     end
+    -- 设置自身可存储的资源种类
+    if resourceType then
+        for rType, _ in pairs(resourceType) do
+            if not self.resourceType[rType] then
+                self.resourceType[rType] = true
+            end
+        end
+    end
     self.resourceManager:update(resources)
     return true
+end
+
+--- 返回可存储资源类型
+---@return table<string, boolean>
+function ContainerStackM:getResourceType()
+    return util.copyTable(self.resourceType)
 end
 
 --- 根据过滤器检查容器内部是否有符合要求的资源
