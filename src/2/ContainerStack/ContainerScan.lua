@@ -64,28 +64,32 @@ end
 --- 检测容器内容
 ---@param peripheralName string
 ---@return table<SlotOrName,a546.Resource>|nil
+---@return table<"item"|"fluid"|string,boolean>|nil
 function out.scan(peripheralName)
     if not out.isContainer(peripheralName) then
         log.warn(("Peripheral %s isn't container"):format(peripheralName))
         return nil
     end
-    local result = {}
+    local resourceType = {}
+    local resources = {}
     local per = peripheral.wrap(peripheralName)
     -- 经过了检查，所以per不可能为nil
     ---@cast per -nil
     if per.list then
+        resourceType["item"] = true
         local list = per.list()
         for slot, itemInfo in pairs(list) do
-            result[slot] = createItemResourceFormat(slot, itemInfo, peripheralName)
+            resources[slot] = createItemResourceFormat(slot, itemInfo, peripheralName)
         end
     end
     if per.tanks then
+        resourceType["fluid"] = true
         local tank = per.tanks()
         for _, fluidInfo in pairs(tank) do
-            result[fluidInfo.name] = createFluidResourceFormat(fluidInfo)
+            resources[fluidInfo.name] = createFluidResourceFormat(fluidInfo)
         end
     end
-    return result
+    return resources, resourceType
 end
 
 return out
