@@ -1,16 +1,17 @@
-local Object          = require("lib.Object")
-local ContainerStackM = require("ContainerStack.ContainerStackM")
-local util            = require("lib.util")
-local TicketBundle    = require("TicketBundle")
-local TransferTicketM = require("ContainerStack.TransferTicketM")
-local log             = require("lib.log")
-local Filter          = require("Filter")
+local Object           = require("lib.Object")
+local ContainerStackM  = require("ContainerStack.ContainerStackM")
+local util             = require("lib.util")
+local TicketBundle     = require("TicketBundle")
+local TransferTicketM  = require("ContainerStack.TransferTicketM")
+local log              = require("lib.log")
+local Filter           = require("Filter")
+local preDefinedFilter = require("preDefinedFilter")
 
 ---@class a546.Warehouse
 ---@field package inputContainerList table<string,a546.ContainerStackM>
 ---@field package outputContainerList table<string,{container:a546.ContainerStackM,filter:a546.Filter}>
 ---@field package storageContainerList table<string,a546.ContainerStackM>
-local Warehouse       = Object:extend()
+local Warehouse        = Object:extend()
 
 ---@cast Warehouse +fun():a546.Warehouse
 function Warehouse:new()
@@ -56,7 +57,9 @@ local CONTAINER_TYPE = {
         ---@param peripheralName string
         ---@param warehouse a546.Warehouse
         insert = function(peripheralName, warehouse)
-            warehouse.storageContainerList[peripheralName] = ContainerStackM(peripheralName)
+            local storage = ContainerStackM(peripheralName)
+            storage:refresh()
+            warehouse.storageContainerList[peripheralName] = storage
         end
     }
 }
@@ -182,7 +185,7 @@ end
 --- 随机从某个输入接口获取资源
 ---@private
 function Warehouse:input()
-    local maxTry = 4
+    -- 预处理相关数据，检查是否符合要求
     ---@type a546.ContainerStackM[]
     local inputContainer = {}
     for _, v in pairs(self.inputContainerList) do
@@ -192,9 +195,55 @@ function Warehouse:input()
         log.warn(("Try to find a inputContainer to input,but have't any input"))
         return
     end
+    -- 随机选一个输入接口作为处理对象
     local randomInputIndex = math.random(#inputContainer)
     local randomInput = inputContainer[randomInputIndex]
     randomInput:refresh()
+    -- 获取该输入中存在的资源类型并分别构造支票
+
+    ---@type table<string,a546.TransferTicketM>
+    local ticketPackage = {}
+    local inputResourceType = randomInput:getResourceType()
+    if not next(inputResourceType) then -- 这说明该接口中没有存储任何资源
+        return
+    end
+    for resourceType, _ in pairs(inputResourceType) do
+        local tempSearchResult = randomInput:search(preDefinedFilter.withType(resourceType))
+        if tempSearchResult then
+            local receipt = randomInput:reserve(tempSearchResult)
+            if not receipt then
+                log.warn(("For some reason, can't reserve resource in input: %s"):format(randomInput.peripheralName))
+                return
+            end
+            ticketPackage[resourceType] = TransferTicketM(randomInput, receipt)
+        end
+    end
+    -- 查询存储列表中是否有可以存贮这些资源的容器
+    ---@type table<string,a546.ContainerStackM[]>
+    local storage = {}
+    for _, container in pairs(self.storageContainerList) do
+        local storageResourceType = container:getResourceType()
+        if not next(storageResourceType) then
+            log.trace(("Storage: %s can't storage any resource"):format(container.peripheralName))
+        end
+        for rType, _ in pairs(storageResourceType) do
+            if inputResourceType[rType] then
+                storage[rType] = storage[rType] or {}
+                table.insert(storage[rType], container)
+            end
+        end
+    end
+    -- 检查是否有可以存储输入接口中资源的存储容器，如果没有，删除之前构造的相应支票；如果有，尝试随机选一个并使用支票
+    for rType, ticket in pairs(ticketPackage) do -- 注意，有些模组的容器（精妙存储系列）会在没有安装储罐升级的情况下提供通用流体外设方法
+        if not storage[rType] then
+            ticketPackage[rType] = nil
+            goto continue
+        end
+        local randomStorage = storage[rType][math.random(#storage[rType])] -- 随机选一个存储容器
+        ticket:use(randomStorage.peripheralName)
+        ::continue::
+    end
+    --[[
     local t = randomInput:search(Filter(function(resource)
         return true
     end))
@@ -222,6 +271,7 @@ function Warehouse:input()
         end))
         i = i + 1
     end
+    ]]
 end
 
 -- 开启仓库事件循环
