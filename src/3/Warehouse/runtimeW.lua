@@ -30,6 +30,7 @@ function runtimeW:run()
                 break
             end
         end
+        self.warehouse:randomRefresh()
         for index, lastTime in pairs(exTime) do
             if os.epoch("local") - lastTime >= self.interfaces[index].delay then
                 self.interfaces[index].mayer()
