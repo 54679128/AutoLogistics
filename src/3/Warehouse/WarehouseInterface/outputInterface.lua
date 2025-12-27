@@ -8,7 +8,7 @@ local output          = InterfaceBase:extend()
 ---@cast output +fun(warehouseM:a546.WarehouseM):a546.WarehouseOutputInterface
 function output:new(warehouseM, peripheralName)
     ---@diagnostic disable-next-line: redundant-parameter
-    self.super.new(self, warehouseM, peripheralName)
+    self.super.new(self, warehouseM, peripheralName, 3)
 end
 
 function output:mayer()
