@@ -31,7 +31,7 @@ function runtimeW:run()
             end
         end
         for index, lastTime in pairs(exTime) do
-            if os.epoch("local") - lastTime <= self.interfaces[index].delay then
+            if os.epoch("local") - lastTime >= self.interfaces[index].delay then
                 self.interfaces[index].mayer()
             end
         end
