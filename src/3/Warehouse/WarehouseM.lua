@@ -166,3 +166,5 @@ function WarehouseM:output(containers, filter)
     log.trace(("Try to output resource to %s"):format(containers.peripheralName))
     ticket:run(containers.peripheralName)
 end
+
+return WarehouseM
