@@ -8,7 +8,7 @@ local input           = InterfaceBase:extend()
 ---@cast input +fun(warehouseM:a546.WarehouseM):a546.WarehouseInputInterface
 function input:new(warehouseM, peripheralName)
     ---@diagnostic disable-next-line: redundant-parameter
-    self.super.new(self, warehouseM, peripheralName, 3)
+    self.super.new(self, warehouseM, peripheralName, 3000)
 end
 
 function input:mayer()
