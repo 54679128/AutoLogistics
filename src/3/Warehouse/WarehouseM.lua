@@ -167,4 +167,22 @@ function WarehouseM:output(containers, filter)
     ticket:run(containers.peripheralName)
 end
 
+--- 随机刷新仓库内某个超过十秒未刷新的库存
+function WarehouseM:randomRefresh()
+    ---@type a546.ContainerStackM[]
+    local container = {}
+    for _, v in pairs(self.storage) do
+        if v.updateTime - os.epoch("local") < -10000 then
+            table.insert(container, v)
+        end
+    end
+    if #container < 1 then
+        log.warn(("Try to refresh a storage,but have't any container that meet the criteria"))
+        return
+    end
+    local randomIndex = math.random(#container)
+    log.trace(("Try to refresh %s"):format(container[randomIndex].peripheralName))
+    container[randomIndex]:refresh()
+end
+
 return WarehouseM
