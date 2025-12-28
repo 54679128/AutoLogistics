@@ -15,7 +15,9 @@ out.input = function(warehouseM, peripheralName, delay)
     delay = delay or 3000
     return WarehouseInterface(warehouseM, peripheralName, delay, function()
         log.trace(("Start to input"))
-        warehouseM:input(ContainerStackM(peripheralName), Filter(function()
+        local container = ContainerStackM(peripheralName)
+        container:refresh()
+        warehouseM:input(container, Filter(function()
             return true
         end))
         log.trace(("Input end"))
