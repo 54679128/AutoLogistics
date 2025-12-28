@@ -4,7 +4,7 @@ local log    = require "lib.log"
 
 ---@class a546.runtimeW
 ---@field warehouse a546.WarehouseM
----@field interfaces a546.WarehouseInterfaceBase[]
+---@field interfaces a546.WarehouseInterface[]
 local runtimeW = Object:extend()
 
 ---@cast runtimeW +fun(warehouse:a546.WarehouseM):a546.runtimeW
