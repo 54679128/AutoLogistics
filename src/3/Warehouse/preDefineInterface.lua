@@ -21,7 +21,7 @@ end
 --- 执行后获得一个默认输出接口实例，其会尝试将仓库内的所有资源输出到容器内
 ---@param warehouseM a546.WarehouseM
 ---@param peripheralName string
----@param filter a546.Filter
+---@param filter? a546.Filter
 ---@param delay? number # 以毫秒为单位
 ---@return a546.WarehouseInterface
 out.output = function(warehouseM, peripheralName, filter, delay)
