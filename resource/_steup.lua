@@ -11,5 +11,5 @@ insertPath(scriptSrcPath .. "2/?.lua")
 insertPath(scriptSrcPath .. "3/?.lua")
 
 local log = require("lib.log")
-log.outfile = "log.txt"
+log.outfile = "log.log"
 log.usecolor = true
