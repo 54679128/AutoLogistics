@@ -1,6 +1,8 @@
 require("_steup")
 
-local Warehouse = require("Warehouse")
+local WarehouseM = require("Warehouse.WarehouseM")
+local runtimeW = require("Warehouse.runtimeW")
+local preDefineInterface = require("Warehouse.preDefineInterface")
 
 local input = {
     ["sophisticatedbackpacks:backpack_2"] = true
@@ -14,28 +16,25 @@ local noContainer = {
     back = true
 }
 
-local testWarehouse = Warehouse()
-
-for peripheralName, _ in pairs(input) do
-    testWarehouse:add(peripheralName, "input")
-end
-
-for peripheralName, _ in pairs(output) do
-    testWarehouse:add(peripheralName, "output")
-end
-
+local testWarehouse = WarehouseM()
 for _, peripheralName in pairs(peripheral.getNames()) do
-    if noContainer[peripheralName] then
+    if input[peripheralName] then
         goto continue
     end
     if output[peripheralName] then
         goto continue
     end
-    if input[peripheralName] then
+    if noContainer[peripheralName] then
         goto continue
     end
-    testWarehouse:add(peripheralName, "storage")
+    testWarehouse:addStorage(peripheralName)
     ::continue::
 end
 
-testWarehouse:run()
+local testInput = preDefineInterface.input(testWarehouse, "sophisticatedbackpacks:backpack_2", nil)
+local testOutput = preDefineInterface.output(testWarehouse, "sophisticatedbackpacks:backpack_3", nil, nil)
+
+local testRun = runtimeW(testWarehouse)
+testRun:addInterface(testInput)
+testRun:addInterface(testOutput)
+testRun:run()

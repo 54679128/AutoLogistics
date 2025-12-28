@@ -77,7 +77,7 @@ function out.scan(peripheralName)
     ---@cast per -nil
     if per.list then
         resourceType["item"] = true
-        local list = per.list()
+        local list = per.list() or {}
         for slot, itemInfo in pairs(list) do
             resources[slot] = createItemResourceFormat(slot, itemInfo, peripheralName)
         end
