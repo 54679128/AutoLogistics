@@ -1,6 +1,7 @@
 local WarehouseInterface = require "Warehouse.WarehouseInterface"
 local ContainerStackM    = require "ContainerStack.ContainerStackM"
 local Filter             = require "Filter"
+local log                = require "lib.log"
 
 
 local out = {}
@@ -11,10 +12,13 @@ local out = {}
 ---@param delay? number # 以毫秒为单位
 ---@return a546.WarehouseInterface
 out.input = function(warehouseM, peripheralName, delay)
+    delay = delay or 3000
     return WarehouseInterface(warehouseM, peripheralName, delay, function()
+        log.trace(("Start to input"))
         warehouseM:input(ContainerStackM(peripheralName), Filter(function()
             return true
         end))
+        log.trace(("Input end"))
     end)
 end
 
@@ -25,9 +29,12 @@ end
 ---@param delay? number # 以毫秒为单位
 ---@return a546.WarehouseInterface
 out.output = function(warehouseM, peripheralName, filter, delay)
+    delay = delay or 3000
     filter = filter or Filter(function() return true end)
     return WarehouseInterface(warehouseM, peripheralName, delay, function()
+        log.trace(("Start to output"))
         warehouseM:output(ContainerStackM(peripheralName), filter)
+        log.trace(("Output end"))
     end)
 end
 
