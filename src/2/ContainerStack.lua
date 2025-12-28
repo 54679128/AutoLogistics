@@ -1,7 +1,6 @@
 local Object = require("lib.Object")
 local log = require("lib.log")
 local util = require("lib.util")
-log.outfile = "log.txt"
 
 ---@class a546.ItemStack
 ---@field count number 对于流体，这代表 amount
