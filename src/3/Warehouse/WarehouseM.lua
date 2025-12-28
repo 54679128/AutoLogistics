@@ -92,6 +92,7 @@ end
 function WarehouseM:input(containers, filter)
     local inputResourceType = containers:getResourceType()
     if not next(inputResourceType) then -- 不能存储任何资源，可能是容器没有初始化
+        log.warn(("For some reason container: %s can't storage any resource"):format(containers.peripheralName))
         return
     end
     ---@type table<string,searchResult>
