@@ -84,7 +84,7 @@ function out.scan(peripheralName)
     end
     if per.tanks then
         resourceType["fluid"] = true
-        local tank = per.tanks()
+        local tank = per.tanks() or {}
         for _, fluidInfo in pairs(tank) do
             resources[fluidInfo.name] = createFluidResourceFormat(fluidInfo)
         end
