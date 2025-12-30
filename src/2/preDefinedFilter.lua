@@ -10,7 +10,7 @@ function out.withName(name)
             return true
         end
         return false
-    end)
+    end, "With Name")
 end
 
 --- 按种类过滤
@@ -22,7 +22,7 @@ function out.withType(resourceType)
             return true
         end
         return false
-    end)
+    end, "With Type")
 end
 
 --- 按堆叠数量过滤
@@ -34,7 +34,7 @@ function out.withQuantity(quantity)
             return true
         end
         return false
-    end)
+    end, "With Quantity")
 end
 
 --- 按标签过滤
@@ -55,7 +55,7 @@ function out.withTag(tag)
             return true
         end
         return false
-    end)
+    end, "With Tag")
 end
 
 --- 按nbt过滤
@@ -67,7 +67,7 @@ function out.withNbt(nbt)
             return true
         end
         return false
-    end)
+    end, "With Nbt")
 end
 
 --- 按显示名称过滤
@@ -88,7 +88,7 @@ function out.withDisplayName(displayName)
             return true
         end
         return false
-    end)
+    end, "With Display Name")
 end
 
 return out
