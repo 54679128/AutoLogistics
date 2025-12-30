@@ -21,7 +21,7 @@ out.input = function(warehouseM, peripheralName, delay)
             return true
         end))
         log.trace(("Input end"))
-    end)
+    end, ("Input: %s"):format(peripheralName))
 end
 
 --- 执行后获得一个默认输出接口实例，其会尝试将仓库内的所有资源输出到容器内
@@ -37,7 +37,7 @@ out.output = function(warehouseM, peripheralName, filter, delay)
         log.trace(("Start to output"))
         warehouseM:output(ContainerStackM(peripheralName), filter)
         log.trace(("Output end"))
-    end)
+    end, ("Output: %s"):format(peripheralName))
 end
 
 return out
