@@ -6,14 +6,21 @@ local TicketBundle     = require("TicketBundle")
 local TransferTicketM  = require("ContainerStack.TransferTicketM")
 local preDefinedFilter = require("preDefinedFilter")
 local Filter           = require("Filter")
+local util             = require("lib.util")
 
 ---@class a546.WarehouseM
 ---@field private storage table<string,a546.ContainerStackM>
+---@field name string
 local WarehouseM       = Object:extend()
 
----@cast WarehouseM +fun():a546.WarehouseM
-function WarehouseM:new()
+---@cast WarehouseM +fun(name?:string):a546.WarehouseM
+function WarehouseM:new(name)
     self.storage = {}
+    self.name = name or util.generateRandomString(4)
+end
+
+function WarehouseM:__tostring()
+    return self.name
 end
 
 --- 将一个容器设为仓库的可用库存
