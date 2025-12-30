@@ -1,15 +1,22 @@
 local Object = require("lib.Object")
 local log = require("lib.log")
+local util = require("lib.util")
 
 ---@class a546.TicketBundle
 ---@field private tickets table<Receipt,a546.TransferTicketM>
 ---@field private usage boolean
+---@field name string
 local TicketBundle = Object:extend()
 
----@cast TicketBundle +fun():a546.TicketBundle
-function TicketBundle:new()
+---@cast TicketBundle +fun(name?:string):a546.TicketBundle
+function TicketBundle:new(name)
     self.tickets = {}
     self.usage = false
+    name = name or util.generateRandomString(4)
+end
+
+function TicketBundle:__tostring()
+    return self.name
 end
 
 --- 添加一张支票
