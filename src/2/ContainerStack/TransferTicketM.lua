@@ -20,6 +20,10 @@ function TransferTicketM:new(containerStack, receipt)
     self.used = false
 end
 
+function TransferTicketM:__tostring()
+    return self.receipt .. tostring(self.createdAt)
+end
+
 --- 检查支票是否可用
 ---@return boolean
 function TransferTicketM:isAvailable()
