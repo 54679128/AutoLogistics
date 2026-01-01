@@ -44,15 +44,15 @@ function TicketBundle:run(targetPeripheralName)
     if self.usage then
         return false
     end
+    self.usage = true
     for _, ticket in pairs(self.tickets) do
         local success = ticket:use(targetPeripheralName)
-        log.trace(("Ticket %s successful use"):format(ticket))
         if not success then
             log.trace(("Ticket %s fail when use"):format(ticket))
-            self.usage = true
+        else
+            log.trace(("Ticket %s successful use"):format(ticket))
         end
     end
-    self.usage = true
     return true
 end
 
