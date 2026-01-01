@@ -12,7 +12,7 @@ local TicketBundle = Object:extend()
 function TicketBundle:new(name)
     self.tickets = {}
     self.usage = false
-    name = name or util.generateRandomString(4)
+    self.name = name or util.generateRandomString(4)
 end
 
 function TicketBundle:__tostring()
