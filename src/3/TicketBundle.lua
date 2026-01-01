@@ -23,7 +23,7 @@ end
 ---@param receipt Receipt
 ---@param ticket a546.TransferTicketM
 function TicketBundle:add(receipt, ticket)
-    log.trace(("Add ticket %s / %s to ticketBundle %s"):format(ticket, receipt, self))
+    log.trace(("Add ticket %s to ticketBundle %s"):format(ticket, self))
     self.tickets[receipt] = ticket
 end
 
@@ -33,7 +33,7 @@ end
 function TicketBundle:remove(receipt)
     local result = self.tickets[receipt]
     self.tickets[receipt] = nil
-    log.trace(("Remove ticket %s from ticketBundle %s"):format(receipt, self))
+    log.trace(("Remove ticket %s from ticketBundle %s"):format(result, self))
     return result
 end
 
