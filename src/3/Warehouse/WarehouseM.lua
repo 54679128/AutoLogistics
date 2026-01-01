@@ -8,6 +8,9 @@ local preDefinedFilter = require("preDefinedFilter")
 local Filter           = require("Filter")
 local util             = require("lib.util")
 
+-- input函数在内部循环查找可用内部容器的最大次数
+local inputMaxTry      = 7
+
 ---@class a546.WarehouseM
 ---@field private storage table<string,a546.ContainerStackM>
 ---@field name string
@@ -93,10 +96,12 @@ function WarehouseM:getTicket(searchResult)
     return bundle
 end
 
---- 从容器内收取资源
+--- 按容器内的类型返回支票
 ---@param containers a546.ContainerStackM
 ---@param filter a546.Filter
-function WarehouseM:input(containers, filter)
+---@return table<string,a546.TransferTicketM>|nil
+---@private
+function WarehouseM:getResourceTypeTicket(containers, filter)
     local inputResourceType = containers:getResourceType()
     if not next(inputResourceType) then -- 不能存储任何资源，可能是容器没有初始化
         log.warn(("For some reason container: %s can't storage any resource"):format(containers.peripheralName))
@@ -127,6 +132,14 @@ function WarehouseM:input(containers, filter)
         end
         ticketPackage[rType] = TransferTicketM(containers, receipt)
     end
+    return ticketPackage
+end
+
+--- 从容器内收取资源
+---@param containers a546.ContainerStackM
+---@param filter a546.Filter
+function WarehouseM:input(containers, filter)
+    local inputResourceType = containers:getResourceType()
     -- 查询存储列表中是否有可以存贮这些资源的容器
 
     ---@type table<string,a546.ContainerStackM[]>
@@ -145,16 +158,35 @@ function WarehouseM:input(containers, filter)
         end
         ::continue::
     end
-    -- 检查是否有可以存储输入接口中资源的存储容器，如果没有，删除之前构造的相应支票；如果有，尝试随机选一个并使用支票
 
-    for rType, ticket in pairs(ticketPackage) do -- 注意，有些模组的容器（精妙存储系列）会在没有安装储罐升级的情况下提供通用流体外设方法
-        if not storage[rType] then
-            ticketPackage[rType] = nil
-            goto continue
+    -- 检查是否有可以存储输入接口中资源的存储容器，如果没有，删除构造的相应支票；如果有，尝试随机选一个并使用支票。如果一轮下来仍然又未转移的资源，尝试重复前述过程
+
+    local success = false
+    local i = 0
+    while not success do
+        if i >= inputMaxTry then
+            return
         end
-        local randomStorage = storage[rType][math.random(#storage[rType])] -- 随机选一个存储容器
-        ticket:use(randomStorage.peripheralName)
-        ::continue::
+        -- 按照给定过滤器构造支票，并按资源类型分类：也就是说，同一捆支票中的资源具有相同类型
+        local ticketPackage = self:getResourceTypeTicket(containers, filter)
+        -- 如果没有得到任何支票，要么是过滤器无法匹配任何资源，要么容器就是空的
+        if not ticketPackage then
+            return
+        end
+        for rType, ticket in pairs(ticketPackage) do -- 注意，有些模组的容器（精妙存储系列）会在没有安装储罐升级的情况下提供通用流体外设方法
+            if not storage[rType] then
+                ticketPackage[rType] = nil
+                goto continue
+            end
+            local randomIndex = math.random(#storage[rType])
+            local randomStorage = storage[rType][randomIndex] -- 随机选一个存储容器
+            success = ticket:use(randomStorage.peripheralName)
+            if not success then
+                table.remove(storage[rType], randomIndex)
+            end
+            ::continue::
+        end
+        i = i + 1
     end
 end
 
