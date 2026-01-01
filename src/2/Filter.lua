@@ -12,7 +12,7 @@ function Filter:new(predicate, name)
     self.predicate = predicate or function()
         return true
     end
-    name = name or util.generateRandomString(4)
+    self.name = name or util.generateRandomString(4)
 end
 
 function Filter:__tostring()
