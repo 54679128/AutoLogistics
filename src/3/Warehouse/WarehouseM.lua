@@ -102,6 +102,7 @@ end
 ---@return table<string,a546.TransferTicketM>|nil
 ---@private
 function WarehouseM:getResourceTypeTicket(containers, filter)
+    containers:refresh()
     local inputResourceType = containers:getResourceType()
     if not next(inputResourceType) then -- 不能存储任何资源，可能是容器没有初始化
         log.warn(("For some reason container: %s can't storage any resource"):format(containers.peripheralName))
