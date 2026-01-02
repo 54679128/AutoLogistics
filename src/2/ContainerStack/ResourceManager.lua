@@ -140,13 +140,63 @@ end
 
 --- 删除错误或已消耗的预定记录
 ---@param receipt Receipt
-function ResourceManager:consume(receipt)
-    if not self.reserveResources[receipt] then
-        log.warn(("Try to delete doesn't exist receipt %s"):format(receipt))
+---@param detail? {slotOrName:SlotOrName,quantity:number} 该参数允许你精细的指定什么资源应该消耗多少
+function ResourceManager:consume(receipt, detail)
+    --- 进行一些检查，以确保消耗不会出错
+    ---@return boolean
+    local function check()
+        if not self.reserveResources[receipt] then
+            log.warn(("Try to delete doesn't exist receipt %s"):format(receipt))
+            return false
+        end
+        if not detail then
+            return true
+        end
+        --[[
+        if not (detail.quantity and detail.slotOrName) then
+            log.warn(("Consume except detail: {slotOrName:number|string,quantity:number}, but get: {slotOrName:%s,quantity:%s}")
+                :format(type(detail.slotOrName), type(detail.quantity)))
+            return false
+        end
+        if type(detail.quantity) ~= "number" then
+            log.warn(("Param detail.quantity should be number, but get: %s"):format(type(detail.quantity)))
+        end
+        ]]
+        if not self.reserveResources[receipt][detail.slotOrName] then
+            log.warn(("Try to delete doesn't exist resource, receipt: %s; resourceIndex: %s"):format(receipt,
+                tostring(detail.slotOrName)))
+            return false
+        end
+        if not self.reserveResources[receipt][detail.slotOrName] < detail.quantity then
+            log.warn(("Try to delete too much resource, receipt: %s; resourceIndex: %s;try to delete quantity: %s")
+                :format(receipt,
+                    tostring(detail.slotOrName), tostring(detail.quantity)))
+            return false
+        end
+        return true
+    end
+    --- 默认情况下消耗支票
+    ---@param receipt Receipt
+    local function normalConsume(receipt)
+        self.reserveResources[receipt] = nil
+        self.createdAt[receipt] = nil
+    end
+    --- 精细的消耗对应支票中的资源
+    ---@param receipt Receipt
+    ---@param detail {slotOrName:SlotOrName,quantity:number}
+    local function detailConsume(receipt, detail)
+        self.reserveResources[receipt][detail.slotOrName].quantity = self.reserveResources[receipt][detail.slotOrName]
+            .quantity - detail.quantity
+    end
+    -- 主逻辑
+    if not check() then
         return
     end
-    self.reserveResources[receipt] = nil
-    self.createdAt[receipt] = nil
+    if not detail then
+        normalConsume(receipt)
+    else
+        detailConsume(receipt, detail)
+    end
 end
 
 --- 获取预留的资源信息
