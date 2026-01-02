@@ -68,10 +68,12 @@ function TransferTicketM:use(targetPeripheralName)
             cleanup()
             log.warn(("The actual transfer quantity: %s isn't equal to the scheduled transfer quantity: %s"):format(
                 tostring(transferQuantityResult[1].transferResource), tostring(info.quantity)))
-            if transferQuantityResult[1].errMessage then -- 如果确实发生了某种错误（比如外设源、目标任一外设消失）而不是传输数量与预期不符，那么没有任何方法确定具体传输了多少物品
+            if transferQuantityResult[1].errMessage then  -- 如果确实发生了某种错误（比如外设源、目标任一外设消失）而不是传输数量与预期不符，那么没有任何方法确定具体传输了多少物品
                 log.error(transferQuantityResult[1].errMessage)
                 self.containerStack:consume(self.receipt) -- 另外这里还有一个问题：想象一个`receipt`对应着成千上万槽位的不同资源，贸然删除它们会带来奇怪的后果。
-            else -- 在这里，我们明确一次传输实际上传输了多少资源，并只消耗对应数量的资源
+            else                                          -- 在这里，我们明确一次传输实际上传输了多少资源，并只消耗对应数量的资源
+                log.debug(("No error message, Consume part of resource: %s"):format(tostring(transferQuantityResult[1]
+                .transferResource)))
                 self.containerStack:consume(self.receipt,
                     { slotOrName = slotOrName, quantity = transferQuantityResult[1].transferResource })
             end
