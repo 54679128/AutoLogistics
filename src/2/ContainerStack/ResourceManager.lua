@@ -167,7 +167,7 @@ function ResourceManager:consume(receipt, detail)
                 tostring(detail.slotOrName)))
             return false
         end
-        if not self.reserveResources[receipt][detail.slotOrName] < detail.quantity then
+        if not (self.reserveResources[receipt][detail.slotOrName].quantity < detail.quantity) then
             log.warn(("Try to delete too much resource, receipt: %s; resourceIndex: %s;try to delete quantity: %s")
                 :format(receipt,
                     tostring(detail.slotOrName), tostring(detail.quantity)))
