@@ -76,8 +76,9 @@ end
 
 --- 尝试删除错误或已消耗的预定记录
 ---@param receipt Receipt
-function ContainerStackM:consume(receipt)
-    self.resourceManager:consume(receipt)
+---@param detail? {slotOrName:SlotOrName,quantity:number} 该参数允许你精细的指定什么资源应该消耗多少
+function ContainerStackM:consume(receipt, detail)
+    self.resourceManager:consume(receipt, detail)
 end
 
 --- 获取预留的资源信息
