@@ -7,6 +7,23 @@ local ReceiptExpirationTime = 10
 
 ---@alias Receipt string
 ---@alias searchResult table<SlotOrName,{name:string,quantity:number}>
+---@alias SlotOrName string|number # 数字槽位、字符串代表流体名
+
+---@class a546.ItemStack
+---@field count number 对于流体，这代表 amount
+---@field displayName string|nil
+---@field itemGroups {displayName:string,id:string}[]|{}
+---@field maxCount number|nil
+---@field name string
+---@field tags table<string,boolean>|nil
+---@field nbt string|nil
+
+---@class a546.Resource
+---@field name string 资源名称
+---@field quantity number 资源数量
+---@field resourceType "item"|"fluid"|string
+---@field nbt string|nil 这个 NBT 数据没有包含任何有用的信息，但允许你区分相同的物品
+---@field detail nil|(fun():a546.ItemStack|nil)
 
 ---@class a546.ResourceManager
 ---@field resources table<SlotOrName,a546.Resource>
