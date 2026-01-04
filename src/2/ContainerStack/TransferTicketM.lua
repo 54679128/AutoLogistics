@@ -6,6 +6,8 @@ local invoker = require("CommandInvoker")
 
 local expirationTime = 5
 
+---@alias LockReceipt string # 票据
+
 ---@class a546.TransferTicketM
 ---@field private containerStack a546.ContainerStackM
 ---@field private receipt LockReceipt
@@ -73,7 +75,7 @@ function TransferTicketM:use(targetPeripheralName)
                 self.containerStack:consume(self.receipt) -- 另外这里还有一个问题：想象一个`receipt`对应着成千上万槽位的不同资源，贸然删除它们会带来奇怪的后果。
             else                                          -- 在这里，我们明确一次传输实际上传输了多少资源，并只消耗对应数量的资源
                 log.debug(("No error message, Consume part of resource: %s"):format(tostring(transferQuantityResult[1]
-                .transferResource)))
+                    .transferResource)))
                 self.containerStack:consume(self.receipt,
                     { slotOrName = slotOrName, quantity = transferQuantityResult[1].transferResource })
             end
