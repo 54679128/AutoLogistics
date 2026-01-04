@@ -45,11 +45,8 @@ end
 ---@param targetPeripheralName string
 ---@return boolean
 function TransferTicketM:use(targetPeripheralName)
-    local function cleanup()
-        self.used = true
-    end
+    self.used = true
     if not self:isAvailable() then
-        cleanup()
         self.containerStack:release(self.receipt)
         return false
     end
@@ -67,7 +64,6 @@ function TransferTicketM:use(targetPeripheralName)
         end
         local transferQuantityResult = stepInvoker:processAll()
         if transferQuantityResult[1].transferResource ~= info.quantity then
-            cleanup()
             log.warn(("The actual transfer quantity: %s isn't equal to the scheduled transfer quantity: %s"):format(
                 tostring(transferQuantityResult[1].transferResource), tostring(info.quantity)))
             if transferQuantityResult[1].errMessage then  -- 如果确实发生了某种错误（比如外设源、目标任一外设消失）而不是传输数量与预期不符，那么没有任何方法确定具体传输了多少物品
@@ -83,7 +79,7 @@ function TransferTicketM:use(targetPeripheralName)
         end
         stepInvoker:clear()
     end
-    cleanup()
+
     self.containerStack:release(self.receipt) -- 最后，释放那些实际上没有用到的资源
     return true
 end
