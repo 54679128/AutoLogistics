@@ -23,7 +23,7 @@ function CommandInvoker:clear()
 end
 
 --- 执行所有命令
----@return table<number,TransferResult>
+---@return table<number,TransferResult> # 从1开始，总是按照命令加入顺序排序
 function CommandInvoker:processAll()
     local result = {}
     for _, command in ipairs(self.commands) do
