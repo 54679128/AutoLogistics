@@ -45,47 +45,50 @@ end
 ---@param targetPeripheralName string
 ---@return boolean
 function TransferTicketM:use(targetPeripheralName)
-    local function cleanup()
-        self.used = true
-    end
     if not self:isAvailable() then
-        cleanup()
         self.containerStack:release(self.receipt)
         return false
     end
+    self.used = true
     -- 已验证票据可用，所以reserve必不为nil
     local reserve = self.containerStack:getReserve(self.receipt)
-    local stepInvoker = invoker()
+    local workerInvoker = invoker()
+    ---@type table<number,{slotOrName:SlotOrName,info:{name:string,quantity:number}}>
+    local reserveList = {}
     ---@cast reserve -nil
     for slotOrName, info in pairs(reserve) do
+        table.insert(reserveList, { slotOrName = slotOrName, info = info })
         if type(slotOrName) == "string" then
-            stepInvoker:addCommand(fluidCommand(self.containerStack.peripheralName, targetPeripheralName, info.quantity,
+            workerInvoker:addCommand(fluidCommand(self.containerStack.peripheralName, targetPeripheralName, info
+                .quantity,
                 info.name))
         else
-            stepInvoker:addCommand(itemCommand(self.containerStack.peripheralName, targetPeripheralName, slotOrName,
+            workerInvoker:addCommand(itemCommand(self.containerStack.peripheralName, targetPeripheralName, slotOrName,
                 info.quantity))
         end
-        local transferQuantityResult = stepInvoker:processAll()
-        if transferQuantityResult[1].transferResource ~= info.quantity then
-            cleanup()
+    end
+    local invokerResult = workerInvoker:processAll()
+    -- 用于储存当前支票是否传输了所有预定传输的资源
+    local success = true
+    for index, transferResult in ipairs(invokerResult) do
+        if transferResult.transferResource ~= reserveList[index].info.quantity then
             log.warn(("The actual transfer quantity: %s isn't equal to the scheduled transfer quantity: %s"):format(
-                tostring(transferQuantityResult[1].transferResource), tostring(info.quantity)))
-            if transferQuantityResult[1].errMessage then  -- 如果确实发生了某种错误（比如外设源、目标任一外设消失）而不是传输数量与预期不符，那么没有任何方法确定具体传输了多少物品
-                log.error(transferQuantityResult[1].errMessage)
+                tostring(transferResult.transferResource), tostring(reserveList[index].info.quantity)))
+            if transferResult.errMessage then             -- 如果确实发生了某种错误（比如外设源、目标任一外设消失）而不是传输数量与预期不符，那么没有任何方法确定具体传输了多少物品
+                log.error(transferResult.errMessage)
                 self.containerStack:consume(self.receipt) -- 另外这里还有一个问题：想象一个`receipt`对应着成千上万槽位的不同资源，贸然删除它们会带来奇怪的后果。
+                success = false
             else                                          -- 在这里，我们明确一次传输实际上传输了多少资源，并只消耗对应数量的资源
-                log.debug(("No error message, Consume part of resource: %s"):format(tostring(transferQuantityResult[1]
+                log.debug(("No error message, Consume part of resource: %s"):format(tostring(transferResult
                     .transferResource)))
                 self.containerStack:consume(self.receipt,
-                    { slotOrName = slotOrName, quantity = transferQuantityResult[1].transferResource })
+                    { slotOrName = reserveList[index].slotOrName, quantity = transferResult.transferResource })
+                success = false
             end
-            return false
         end
-        stepInvoker:clear()
     end
-    cleanup()
     self.containerStack:release(self.receipt) -- 最后，释放那些实际上没有用到的资源
-    return true
+    return success
 end
 
 return TransferTicketM
