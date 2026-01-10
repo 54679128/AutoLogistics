@@ -91,4 +91,34 @@ function out.withDisplayName(displayName)
     end, "With Display Name")
 end
 
+--- 按总数过滤
+---@param limit number
+---@return a546.Filter
+function out.withTotalQuantity(limit)
+    --- 已选取的资源总数
+    local x = 0
+    return Filter(function(resource)
+        --[[
+        local take = true
+        local howMuch = 0
+        if x + resource.quantity < limit then
+            howMuch = resource.quantity
+            x = x + resource.quantity
+        elseif x == limit then
+            take = false
+        else
+            howMuch = limit - x
+            x = limit
+        end
+        return take, howMuch
+        ]]
+        if x >= limit then
+            return false, 0
+        end
+        local howMuch = math.min(resource.quantity, limit - x)
+        x = x + howMuch
+        return true, howMuch
+    end, "With Total Quantity")
+end
+
 return out
