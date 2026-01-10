@@ -60,10 +60,15 @@ function ResourceManager:search(filter)
     ---@type searchResult|table
     local result = {}
     for slotOrName, resource in pairs(self.resources) do
-        if not filter.predicate(resource) then
+        local take, howMuch = filter.predicate(resource)
+        if not take then
             goto continue
         end
-        result[slotOrName] = { name = resource.name, quantity = resource.quantity }
+        local quantity = resource.quantity
+        if howMuch and howMuch < resource.quantity then
+            quantity = howMuch
+        end
+        result[slotOrName] = { name = resource.name, quantity = quantity }
         ::continue::
     end
     if not next(result) then
