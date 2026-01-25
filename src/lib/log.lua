@@ -22,14 +22,47 @@ log.usecolor = true
 log.outfile = nil
 log.level = "trace"
 
+local ansi = {
+    blue   = "\27[34m",
+    cyan   = "\27[36m",
+    green  = "\27[32m",
+    yellow = "\27[33m",
+    red    = "\27[31m",
+    purple = "\27[35m",
+    white  = "\27[0m",
+}
+
+local backend = {
+    write = function(str)
+        if write then
+            write(str)
+        else
+            io.write(str)
+        end
+    end,
+    setColor = function(color)
+        if colors then
+            term.setTextColor(colors[color])
+        else
+            io.write(ansi[color])
+        end
+    end,
+    reSetColor = function()
+        if colors then
+            term.setTextColor(colors.white)
+        else
+            io.write(ansi.white)
+        end
+    end
+}
 
 local modes = {
-    { name = "trace", color = colors.blue, },
-    { name = "debug", color = colors.cyan, },
-    { name = "info",  color = colors.green, },
-    { name = "warn",  color = colors.yellow, },
-    { name = "error", color = colors.red, },
-    { name = "fatal", color = colors.purple, },
+    { name = "trace", color = "blue", },
+    { name = "debug", color = "cyan", },
+    { name = "info",  color = "green", },
+    { name = "warn",  color = "yellow", },
+    { name = "error", color = "red", },
+    { name = "fatal", color = "purple", },
 }
 
 ---@type table<number,table>
@@ -74,13 +107,13 @@ for i, x in ipairs(modes) do
         local info = debug.getinfo(2, "Sl")
         local lineinfo = info.short_src .. ":" .. info.currentline
 
-        local tempColor = term.getTextColor()
+        --local tempColor = term.getTextColor()
         if log.usecolor then
-            term.setTextColor(x.color)
+            backend.setColor(x.color)
         end
-        write(("[%-6s%s] "):format(nameupper, os.date("%H:%M:%S")))
-        term.setTextColor(tempColor)
-        write(("%s: %s\n"):format(lineinfo, msg))
+        backend.write(("[%-6s%s] "):format(nameupper, os.date("%H:%M:%S")))
+        backend.reSetColor()
+        backend.write(("%s: %s\n"):format(lineinfo, msg))
 
         --[[
         -- Output to console
