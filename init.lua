@@ -1,7 +1,7 @@
 local out = {}
 local originRequire = require
 local parentModuleName = (({ ... })[1]) --:gsub("\\[^\\]+$", "")
-print(("父模块路径：%s"):format(parentModuleName))
+--print(("父模块路径：%s"):format(parentModuleName))
 local function modifiedRequire(moduleName)
     local modifiedModuleName = ("%s.%s.%s"):format(parentModuleName, "src", moduleName)
     -- print(("修改后的模块名为：%s"):format(modifiedModuleName))
@@ -14,7 +14,7 @@ local function loadModule(moduleName)
     local moduleActuallyName = moduleName:match("%.([^%.]+)$")
     -- print(("实际模块名为：%s"):format(moduleActuallyName))
     out[moduleActuallyName] = require(moduleName)
-    print(("成功加载 \"%s\" 模块"):format(moduleActuallyName))
+    --print(("成功加载 \"%s\" 模块"):format(moduleActuallyName))
 end
 
 require = modifiedRequire
