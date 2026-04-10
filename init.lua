@@ -11,7 +11,7 @@ end
 --- 加载子模块
 ---@param moduleName string
 local function loadModule(moduleName)
-    local moduleActuallyName = moduleName:match("%.([^%.]+)$")
+    local moduleActuallyName = moduleName:match("%.?([^%.]+)$")
     -- print(("实际模块名为：%s"):format(moduleActuallyName))
     out[moduleActuallyName] = require(moduleName)
     --print(("成功加载 \"%s\" 模块"):format(moduleActuallyName))
