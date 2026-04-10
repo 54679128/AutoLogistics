@@ -1,6 +1,6 @@
 local Object          = require "lib.Object"
-local ContainerScan   = require "ContainerStack.ContainerScan"
-local ResourceManager = require "ContainerStack.ResourceManager"
+local ContainerScan   = require "2.ContainerStack.ContainerScan"
+local ResourceManager = require "2.ContainerStack.ResourceManager"
 local log             = require "lib.log"
 local util            = require "lib.util"
 

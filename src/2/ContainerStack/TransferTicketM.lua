@@ -1,8 +1,8 @@
 local log = require("lib.log")
 local Object = require("lib.Object")
-local itemCommand = require("commands.TransferSlotToInventory")
-local fluidCommand = require("commands.TransferFluid")
-local invoker = require("CommandInvoker")
+local itemCommand = require("1.commands.TransferSlotToInventory")
+local fluidCommand = require("1.commands.TransferFluid")
+local invoker = require("1.CommandInvoker")
 
 local expirationTime = 5
 

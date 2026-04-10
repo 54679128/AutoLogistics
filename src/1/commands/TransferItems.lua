@@ -1,4 +1,4 @@
-local base = require("TransferCommandBase")
+local base = require("1.TransferCommandBase")
 
 ---@param command a546.TransferItems
 ---@return number
