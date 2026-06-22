@@ -12,7 +12,7 @@
 local Object = {}
 Object.__index = Object
 
-function Object:new()
+function Object:new(...)
 end
 
 --- 返回继承的类对象
@@ -68,7 +68,6 @@ end
 ---@return Object
 function Object:__call(...)
   local obj = setmetatable({}, self)
-  ---@diagnostic disable-next-line: redundant-parameter
   obj:new(...)
   return obj
 end
