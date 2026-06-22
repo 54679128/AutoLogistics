@@ -9,6 +9,7 @@
 
 ---@class Object 基类
 ---@field super Object|nil 父类
+---@overload fun():Object
 local Object = {}
 
 ---@private
