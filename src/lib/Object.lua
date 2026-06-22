@@ -10,8 +10,11 @@
 ---@class Object 基类
 ---@field super Object|nil 父类
 local Object = {}
+
+---@private
 Object.__index = Object
 
+---@protected
 function Object:new(...)
 end
 
@@ -59,6 +62,7 @@ function Object:is(T)
   return false
 end
 
+---@private
 function Object:__tostring()
   return "Object"
 end
@@ -66,6 +70,7 @@ end
 --- 可以使用Object()的写法创建实例
 ---@param ... unknown
 ---@return Object
+---@private
 function Object:__call(...)
   local obj = setmetatable({}, self)
   obj:new(...)
