@@ -63,7 +63,7 @@ function Object:__tostring()
   return "Object"
 end
 
---- 我不知道这是干嘛用的
+--- 可以使用Object()的写法创建实例
 ---@param ... unknown
 ---@return Object
 function Object:__call(...)
