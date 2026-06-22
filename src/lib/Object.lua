@@ -9,10 +9,14 @@
 
 ---@class Object 基类
 ---@field super Object|nil 父类
+---@overload fun():Object
 local Object = {}
+
+---@private
 Object.__index = Object
 
-function Object:new()
+---@protected
+function Object:new(...)
 end
 
 --- 返回继承的类对象
@@ -59,16 +63,17 @@ function Object:is(T)
   return false
 end
 
+---@private
 function Object:__tostring()
   return "Object"
 end
 
---- 我不知道这是干嘛用的
+--- 可以使用Object()的写法创建实例
 ---@param ... unknown
 ---@return Object
+---@private
 function Object:__call(...)
   local obj = setmetatable({}, self)
-  ---@diagnostic disable-next-line: redundant-parameter
   obj:new(...)
   return obj
 end
