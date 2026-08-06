@@ -3,22 +3,29 @@ local Object = require("lib.Object")
 local itemCommand = require("1.commands.TransferSlotToInventory")
 local fluidCommand = require("1.commands.TransferFluid")
 local invoker = require("1.CommandInvoker")
+local TransferControl = require("2.TransferControl")
 
 local expirationTime = 5
 
 ---@alias LockReceipt string # 票据
 
+---@alias TransferControlCallBack fun(yesJustIceInHere:a546.TransferControl)
+
 ---@class a546.TransferTicketM
 ---@field private containerStack a546.ContainerStackM
 ---@field private receipt LockReceipt
 ---@field private used boolean
+---@field private transferControl TransferControlCallBack
 local TransferTicketM = Object:extend()
 
----@cast TransferTicketM +fun(containerStack:a546.ContainerStackM,receipt:Receipt):a546.TransferTicketM
-function TransferTicketM:new(containerStack, receipt)
+---@cast TransferTicketM +fun(containerStack:a546.ContainerStackM,receipt:Receipt,transferControl?:TransferControlCallBack):a546.TransferTicketM
+function TransferTicketM:new(containerStack, receipt, TransferControl)
     self.containerStack = containerStack
     self.receipt = receipt
     self.createdAt = os.epoch("local")
+    self.transferControl = TransferControl or function()
+
+    end
     self.used = false
 end
 
@@ -52,11 +59,19 @@ function TransferTicketM:use(targetPeripheralName)
     self.used = true
     -- 已验证票据可用，所以reserve必不为nil
     local reserve = self.containerStack:getReserve(self.receipt)
+    ---@cast reserve -nil
+    local commandInfoList = {}
+    local tempControl = TransferControl(reserve, commandInfoList, self.containerStack.peripheralName,
+        targetPeripheralName)
+    self.transferControl(tempControl)
+    tempControl:defaultAllocate()
+    ---@cast commandInfoList a546.CommandInfo[]
     local workerInvoker = invoker()
+    --- 这个表用来储存转移资源的数量和槽位，以便后续检查传输结果是否正确和精细消耗资源
     ---@type table<number,{slotOrName:SlotOrName,info:{name:string,quantity:number}}>
     local reserveList = {}
-    ---@cast reserve -nil
-    for slotOrName, info in pairs(reserve) do
+    for index, info in ipairs(commandInfoList) do
+        --[[
         table.insert(reserveList, { slotOrName = slotOrName, info = info })
         if type(slotOrName) == "string" then
             workerInvoker:addCommand(fluidCommand(self.containerStack.peripheralName, targetPeripheralName, info
@@ -66,6 +81,9 @@ function TransferTicketM:use(targetPeripheralName)
             workerInvoker:addCommand(itemCommand(self.containerStack.peripheralName, targetPeripheralName, slotOrName,
                 info.quantity))
         end
+        ]]
+        table.insert(reserveList, { slotOrName = info.slotOrName, info = { name = info.name, quantity = info.quantity } })
+        workerInvoker:addCommand(info.command)
     end
     local invokerResult = workerInvoker:processAll()
     -- 用于储存当前支票是否传输了所有预定传输的资源
