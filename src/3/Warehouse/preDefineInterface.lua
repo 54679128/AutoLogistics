@@ -1,4 +1,4 @@
-local WarehouseInterface = require "Warehouse.WarehouseInterface"
+local WarehouseInterface = require "3.Warehouse.WarehouseInterface"
 local ContainerStackM    = require "2.ContainerStack.ContainerStackM"
 local Filter             = require "2.Filter"
 local log                = require "lib.log"

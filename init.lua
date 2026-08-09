@@ -33,7 +33,11 @@ loadModule("2.ContainerStack.ContainerScan")
 loadModule("2.ContainerStack.ContainerStackM")
 loadModule("2.ContainerStack.ResourceManager")
 loadModule("2.ContainerStack.TransferTicketM")
--- 目前正在考虑是否将第三层移除出该模块并将其作为一个独立应用实现，所以不导出
+-- 加载第三层模块
+loadModule("3.Warehouse.preDefineInterface")
+loadModule("3.Warehouse.runtimeW")
+loadModule("3.Warehouse.WarehouseInterface")
+loadModule("3.Warehouse.WarehouseM")
 
 require = originRequire
 -- print(("成功恢复 require 函数"));
