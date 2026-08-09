@@ -15,4 +15,9 @@ M.ContainerStackM = require("2.ContainerStack.ContainerStackM")
 M.ResourceManager = require("2.ContainerStack.ResourceManager")
 M.TransferTicketM = require("2.ContainerStack.TransferTicketM")
 
+M.preDefinedInterface = require("3.Warehouse.preDefinedInterface")
+M.runtimeW = require("3.Warehouse.runtimeW")
+M.WarehouseInterface = require("3.Warehouse.WarehouseInterface")
+M.WarehouseM = require("3.Warehouse.WarehouseM")
+
 return M
