@@ -103,6 +103,10 @@ function TransferTicketM:use(targetPeripheralName)
                     { slotOrName = reserveList[index].slotOrName, quantity = transferResult.transferResource })
                 success = false
             end
+        else
+            C = transferResult
+            self.containerStack:consume(self.receipt,
+                { slotOrName = reserveList[index].slotOrName, quantity = reserveList[index].info.quantity })
         end
     end
     self.containerStack:release(self.receipt) -- 最后，释放那些实际上没有用到的资源
